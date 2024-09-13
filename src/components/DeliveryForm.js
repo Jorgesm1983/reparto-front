@@ -691,8 +691,13 @@ function DeliveryForm() {
         formData.append('client_conformity', clientConformity === 'Sí');
         formData.append('has_issue', hasIssue === 'Sí');
         formData.append('observations', observations);
+        issues.forEach(issue => {
+            if (issue) {
+                formData.append('issues', issue);
+            }
+        });
 
-        formData.append('issues', JSON.stringify(issues.filter(issue => issue !== '')));
+        // formData.append('issues', JSON.stringify(issues.filter(issue => issue !== '')));
 
         completionPhotos.forEach(photo => formData.append('delivery_images', photo));
         if (hasIssue === 'Sí') {
