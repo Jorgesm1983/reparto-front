@@ -103,3 +103,77 @@ fieldset.form-group {
     background-color: #0056b3;
     border-color: #004085;
 }
+
+.product-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  width: 100%; /* Asegura que el contenedor ocupe el 100% del ancho */
+}
+
+.product-input-group {
+  flex-grow: 1; /* El campo de entrada ocupará todo el espacio disponible */
+  max-width: calc(100% - 80px); /* Asegura que el campo de entrada deje espacio para los botones */
+}
+
+.product-add-btn, .product-remove-btn {
+  width: 35px; /* Tamaño fijo para los botones */
+  height: 35px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 5px; /* Espacio entre los botones */
+}
+
+/* Eliminar margen en el primer botón de la fila */
+.product-add-btn:first-child {
+  margin-left: 0;
+}
+
+.product-remove-btn {
+  margin-right: 0;
+}
+
+/* Para pantallas grandes: mantener el diseño correcto */
+@media (min-width: 768px) {
+  .product-input-group {
+      flex: 0 0 92%; /* Mantener el tamaño del campo en pantallas grandes */
+  }
+
+  .button-group {
+      flex: 0 0 8%; /* Los botones ocuparán el 8% del espacio */
+      flex-direction: row;
+      align-items: center;
+  }
+}
+
+/* Para pantallas pequeñas (smartphones) */
+@media (max-width: 576px) {
+  .product-item-row {
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+  }
+
+  .product-input-group {
+      flex-grow: 1; /* El campo de entrada ocupará todo el espacio restante */
+      max-width: calc(100% - 80px); /* Asegura que el campo de entrada deje espacio suficiente para los botones */
+  }
+
+  .button-group {
+      display: flex;
+      justify-content: flex-end; /* Asegura que los botones se mantengan alineados correctamente */
+  }
+
+  .product-add-btn, .product-remove-btn {
+      width: 35px; /* Mantener los botones pequeños en pantallas pequeñas */
+      height: 35px;
+  }
+
+  /* Asegura que el primer botón "+" esté alineado correctamente en pantallas pequeñas */
+  .product-add-btn:first-child {
+      margin-left: 0; /* Elimina el margen innecesario en el primer botón de la fila */
+  }
+}

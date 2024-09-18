@@ -473,7 +473,7 @@ function DeliveryForm() {
                                 <option value="resolution">Resolución</option>
                             </select>
                         </div>
-
+    
                         {visitType && (
                             <>
                                 <div className="form-group">
@@ -489,7 +489,7 @@ function DeliveryForm() {
                                     />
                                     {errors.clientNumber && <div className="invalid-feedback">{errors.clientNumber}</div>}
                                 </div>
-
+    
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
                                         <label htmlFor="fiscalYear">Año Fiscal</label>
@@ -518,7 +518,8 @@ function DeliveryForm() {
                                         {errors.deliveryNumber && <div className="invalid-feedback">{errors.deliveryNumber}</div>}
                                     </div>
                                 </div>
-
+    
+                                {/* Alineamos los campos Cliente Conforme e Incidencia en paralelo */}
                                 <fieldset className="form-group">
                                     <legend>¿Cliente Conforme?</legend>
                                     <div className="form-row">
@@ -552,7 +553,7 @@ function DeliveryForm() {
                                         </div>
                                     </div>
                                 </fieldset>
-
+    
                                 {visitType === 'delivery' && (
                                     <>
                                         <fieldset className="form-group">
@@ -588,7 +589,7 @@ function DeliveryForm() {
                                                 </div>
                                             </div>
                                         </fieldset>
-
+    
                                         {hasIssue === 'Sí' && (
                                             <>
                                                 <div className="form-group">
@@ -605,41 +606,56 @@ function DeliveryForm() {
                                                 <div className="form-group">
                                                     <label htmlFor="issues">Números de Productos Afectados</label>
                                                     {issues.map((issue, index) => (
-                                                        <div key={index} className="form-row">
-                                                            <div className="form-group col-md-10">
+                                                        <div key={index} className="product-item-row align-items-center mb-2">
+                                                             <div className="form-group product-input-group">
                                                                 <input
                                                                     type="number"
                                                                     className={`form-control ${errors.issues ? 'is-invalid' : ''}`}
-                                                                    value={issue}
+                                                                    value={issue || ''}
                                                                     onChange={(e) => handleIssueChange(index, e.target.value)}
                                                                     placeholder="Número de producto"
+                                                                    style={{ width: '100%' }}
                                                                 />
                                                             </div>
-                                                            <div className="form-group col-md-2">
+                                                                {/* Botón "+" para añadir un artículo */}
+                                                                <div className="form-group d-flex justify-content-start align-items-center button-group">
+                                                                {index === issues.length - 1 && (                                        
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-success product-add-btn"
+                                                                        onClick={() => setIssues([...issues, ''])}
+                                                                        style={{ width: '40px', height: '40px', marginRight: '5px', marginLeft: '5px' }}
+                                                                    >
+                                                                        +
+                                                                    </button>
+                                                                )}
+                                                          
+
+                                                            {/* Mostrar el botón "-" solo para el último artículo a partir del segundo */}
+
+                                                            {index === issues.length - 1 && index > 0 && (
+                                                            
                                                                 <button
                                                                     type="button"
-                                                                    className="btn btn-danger"
+                                                                    className="btn btn-danger product-remove-btn"
                                                                     onClick={() => setIssues(issues.filter((_, i) => i !== index))}
+                                                                    style={{ width: '40px', height: '40px' }}
                                                                 >
-                                                                    Eliminar
+                                                                    -
                                                                 </button>
-                                                            </div>
+                                                          
+                                                            )}
+                                                        </div>
                                                         </div>
                                                     ))}
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-primary"
-                                                        onClick={() => setIssues([...issues, ''])}
-                                                    >
-                                                        Añadir otro número
-                                                    </button>
+                                                    
                                                     {errors.issues && <div className="invalid-feedback">{errors.issues}</div>}
                                                 </div>
                                             </>
                                         )}
                                     </>
                                 )}
-
+    
                                 {(visitType === 'verification' || visitType === 'resolution') && (
                                     <>
                                         <fieldset className="form-group">
@@ -675,7 +691,7 @@ function DeliveryForm() {
                                                 </div>
                                             </div>
                                         </fieldset>
-
+    
                                         {is_resolved === 'No' && (
                                             <div className="form-group">
                                                 <label htmlFor="issuePhotos">Foto de Incidencia</label>
@@ -691,7 +707,7 @@ function DeliveryForm() {
                                         )}
                                     </>
                                 )}
-
+    
                                 <div className="form-group">
                                     <label htmlFor="completionPhotos">Foto de Finalización</label>
                                     <input
@@ -703,7 +719,7 @@ function DeliveryForm() {
                                         onChange={(e) => setCompletionPhotos([...e.target.files])}
                                     />
                                 </div>
-
+    
                                 <div className="form-group">
                                     <label htmlFor="observations">Observaciones</label>
                                     <textarea
@@ -718,13 +734,12 @@ function DeliveryForm() {
                                 </div>
                             </>
                         )}
-
+    
                         <button type="submit" className="btn btn-primary">Enviar</button>
                     </form>
                 </div>
             </div>
         </div>
     );
-}
-
+}    
 export default DeliveryForm;
