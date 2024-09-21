@@ -396,7 +396,7 @@ function DeliveryForm() {
                 }
             });
         }  
-        if (hasIssue === 'Sí') {
+        if (hasIssue === 'Sí' || is_resolved === 'No') {
             issuePhotos.forEach(photo => formData.append('issue_photos', photo));
         }
 
