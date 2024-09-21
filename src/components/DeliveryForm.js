@@ -389,6 +389,8 @@ function DeliveryForm() {
         formData.append('is_resolved', is_resolved === 'Sí');  // Convertir a booleano
         completionPhotos.forEach(photo => formData.append('delivery_images', photo));
 
+        const token = localStorage.getItem('token');  // Obtén el token del localStorage
+
         if (hasIssue === 'Sí' && issues.length > 0) {
             issues.forEach(issue => {
                 if (!isNaN(issue)) {
@@ -405,6 +407,7 @@ function DeliveryForm() {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'Authorization': `Token ${token}`,
                 }
             });
 
