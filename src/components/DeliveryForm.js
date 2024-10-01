@@ -306,10 +306,12 @@ function DeliveryForm() {
     const [fiscalYear, setFiscalYear] = useState('');
     const [deliveryNumber, setDeliveryNumber] = useState('');
     const [clientNumber, setClientNumber] = useState('');
+    const [clientName, setClientName] = useState(''); // Nuevo estado para el nombre del cliente
     const [clientConformity, setClientConformity] = useState('Sí');
     const [hasIssue, setHasIssue] = useState('No');
     const [observations, setObservations] = useState('');
     const [issues, setIssues] = useState([0]);
+    const [productDescriptions, setProductDescriptions] = useState([]); // Estado para las descripciones de productos
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
     const [touched, setTouched] = useState({});
@@ -320,12 +322,82 @@ function DeliveryForm() {
     const completionPhotosRef = useRef(null);
     const issuePhotosRef = useRef(null);
     
+// Función para buscar el nombre del cliente basado en el número de cliente
+const fetchClientName = async (clientNumber) => {
+    const token = localStorage.getItem('token');  // Obtén el token almacenado
+    try {
+        const response = await axios.get(`http://192.168.1.40:8000/api/customer/${clientNumber}/`, {
+            headers: {
+                'Authorization': `Token ${token}`  // Agrega el token de autenticación
+            }
+        });
+        if (response.data.name) {
+            setClientName(response.data.name); // Asignamos el nombre del cliente si lo encontramos
+        } else {
+            setClientName(''); // Limpiamos el nombre si no se encuentra
+        }
+    } catch (error) {
+        console.error('Error obteniendo el nombre del cliente:', error);
+        setClientName(''); // Limpiamos el nombre en caso de error
+    }
+};
 
+// Función para manejar el cambio en el número de cliente
+const handleClientNumberChange = (event) => {
+    const clientNumberValue = event.target.value;
+    setClientNumber(clientNumberValue);
+
+    // Solo buscar si el valor tiene al menos un dígito y es válido
+    if (clientNumberValue && !isNaN(clientNumberValue)) {
+        fetchClientName(clientNumberValue);
+    } else {
+        setClientName('');
+    }
+};
+
+// Función para buscar la descripción del producto basado en el número de producto
+const fetchProductDescription = async (index, value) => {
+    const token = localStorage.getItem('token');  // Obtén el token almacenado
+    try {
+        const response = await axios.get(`http://192.168.1.40:8000/api/product/${value}/`, {
+            headers: {
+                'Authorization': `Token ${token}`  // Agrega el token de autenticación
+            }
+        });
+        if (response.data.description) {
+            const newProductDescriptions = [...productDescriptions];
+            newProductDescriptions[index] = response.data.description; // Guardamos la descripción del producto
+            setProductDescriptions(newProductDescriptions);
+        } else {
+            const newProductDescriptions = [...productDescriptions];
+            newProductDescriptions[index] = ''; // Limpiamos si no se encuentra la descripción
+            setProductDescriptions(newProductDescriptions);
+        }
+    } catch (error) {
+        console.error('Error obteniendo la descripción del producto:', error);
+        const newProductDescriptions = [...productDescriptions];
+        newProductDescriptions[index] = ''; // Limpiamos en caso de error
+        setProductDescriptions(newProductDescriptions);
+    }
+};
+
+    // Función para manejar el cambio en los productos afectados
     const handleIssueChange = (index, value) => {
+        const intValue = parseInt(value, 10);
         const newIssues = [...issues];
-        newIssues[index] = parseInt(value, 10); // Convertir a entero
+        newIssues[index] = value; // Convertir a entero
         setIssues(newIssues);
+
+        // Solo buscar si el valor es válido
+        if (value && !isNaN(value)) {
+            fetchProductDescription(index, value);  // Buscar la descripción del producto
+        } else {
+            const newProductDescriptions = [...productDescriptions];
+            newProductDescriptions[index] = '';  // Limpiar la descripción si el valor no es válido
+            setProductDescriptions(newProductDescriptions);
+        }
     };
+
 
     const validateForm = useCallback(() => {
         const newErrors = {};
@@ -342,6 +414,9 @@ function DeliveryForm() {
             newErrors.clientNumber = 'El número de cliente solo puede contener números.';
         }
 
+        if (touched.issues && !/^\d+$/.test(issues)) {
+            newErrors.issues = 'El número de producto solo puede contener números.';
+        }
         if (
             (visitType === 'delivery' && (clientConformity === 'No' || hasIssue === 'Sí')) ||
             ((visitType === 'verification' || visitType === 'resolution') && is_resolved === 'No')
@@ -403,7 +478,7 @@ function DeliveryForm() {
         }
 
         try {
-            await axios.post('http://localhost:8000/api/deliveries/', formData, {
+            await axios.post('http://192.168.1.40:8000/api/deliveries/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'X-Requested-With': 'XMLHttpRequest',
@@ -449,6 +524,7 @@ function DeliveryForm() {
 
 
     return (
+        
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header">
@@ -482,14 +558,23 @@ function DeliveryForm() {
                                 <div className="form-group">
                                     <label htmlFor="clientNumber">Número de Cliente</label>
                                     <input
-                                        type="text"
+                                        type="number"
                                         className={`form-control ${errors.clientNumber ? 'is-invalid' : ''}`}
                                         id="clientNumber"
-                                        value={clientNumber}
-                                        onChange={(e) => setClientNumber(e.target.value)}
+                                        value={clientNumber}  // Solo el número de cliente es editable
+                                        onChange={handleClientNumberChange}
                                         onBlur={() => setTouched(prev => ({ ...prev, clientNumber: true }))}
                                         placeholder="Número de Cliente"
+                                        required
                                     />
+                                    {clientName && (
+                                    <input
+                                        type="text"
+                                        className="form-control mt-2"
+                                        value={clientName}
+                                        readOnly  // Hacemos que el nombre no sea editable
+                                    />
+                                )}
                                     {errors.clientNumber && <div className="invalid-feedback">{errors.clientNumber}</div>}
                                 </div>
     
@@ -497,7 +582,7 @@ function DeliveryForm() {
                                     <div className="form-group col-md-6">
                                         <label htmlFor="fiscalYear">Año Fiscal</label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             className={`form-control ${errors.fiscalYear ? 'is-invalid' : ''}`}
                                             id="fiscalYear"
                                             value={fiscalYear}
@@ -510,7 +595,7 @@ function DeliveryForm() {
                                     <div className="form-group col-md-6">
                                         <label htmlFor="deliveryNumber">Número del Albarán</label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             className={`form-control ${errors.deliveryNumber ? 'is-invalid' : ''}`}
                                             id="deliveryNumber"
                                             value={deliveryNumber}
@@ -522,47 +607,14 @@ function DeliveryForm() {
                                     </div>
                                 </div>
     
-                                {/* Alineamos los campos Cliente Conforme e Incidencia en paralelo */}
-                                <fieldset className="form-group">
-                                    <legend>¿Cliente Conforme?</legend>
-                                    <div className="form-row">
-                                        <div className="form-group col-md-6">
-                                            <div className="custom-control custom-radio">
-                                                <input
-                                                    type="radio"
-                                                    id="clientConformityYes"
-                                                    name="clientConformity"
-                                                    className="custom-control-input"
-                                                    value="Sí"
-                                                    checked={clientConformity === 'Sí'}
-                                                    onChange={(e) => setClientConformity(e.target.value)}
-                                                />
-                                                <label className="custom-control-label" htmlFor="clientConformityYes">Sí</label>
-                                            </div>
-                                        </div>
-                                        <div className="form-group col-md-6">
-                                            <div className="custom-control custom-radio">
-                                                <input
-                                                    type="radio"
-                                                    id="clientConformityNo"
-                                                    name="clientConformity"
-                                                    className="custom-control-input"
-                                                    value="No"
-                                                    checked={clientConformity === 'No'}
-                                                    onChange={(e) => setClientConformity(e.target.value)}
-                                                />
-                                                <label className="custom-control-label" htmlFor="clientConformityNo">No</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
+                                
     
                                 {visitType === 'delivery' && (
                                     <>
                                         <fieldset className="form-group">
                                             <legend>¿Hay Incidencia?</legend>
-                                            <div className="form-row">
-                                                <div className="form-group col-md-6">
+                                            <div className="radio-group" >
+                                                
                                                     <div className="custom-control custom-radio">
                                                         <input
                                                             type="radio"
@@ -575,8 +627,8 @@ function DeliveryForm() {
                                                         />
                                                         <label className="custom-control-label" htmlFor="hasIssueYes">Sí</label>
                                                     </div>
-                                                </div>
-                                                <div className="form-group col-md-6">
+                                                
+                                               
                                                     <div className="custom-control custom-radio">
                                                         <input
                                                             type="radio"
@@ -589,7 +641,7 @@ function DeliveryForm() {
                                                         />
                                                         <label className="custom-control-label" htmlFor="hasIssueNo">No</label>
                                                     </div>
-                                                </div>
+                                                
                                             </div>
                                         </fieldset>
     
@@ -614,12 +666,23 @@ function DeliveryForm() {
                                                                 <input
                                                                     type="number"
                                                                     className={`form-control ${errors.issues ? 'is-invalid' : ''}`}
-                                                                    value={issue || ''}
-                                                                    onChange={(e) => handleIssueChange(index, e.target.value)}
+                                                                    value={issue || ''}  // El número del producto es editable  // El número del producto es editable
+                                                                    onChange={(e) => handleIssueChange(index, e.target.value)}  // Pasamos solo el número ingresado
+                                                                    inputMode="numeric"  // Muestra un teclado numérico en dispositivos móviles
+                                                                    pattern="[0-9]*"  // Acepta solo números
                                                                     placeholder="Número de producto"
                                                                     style={{ width: '100%' }}
                                                                 />
+                                                                {productDescriptions[index] && (
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-control mt-2"
+                                                                    value={productDescriptions[index]}  // Mostrar la descripción del producto
+                                                                    readOnly  // Hacemos que la descripción no sea editable
+                                                                />
+                                                            )}
                                                             </div>
+                                                               
                                                                 {/* Botón "+" para añadir un artículo */}
                                                                 <div className="form-group d-flex justify-content-start align-items-center button-group">
                                                                 {index === issues.length - 1 && (                                        
@@ -663,8 +726,8 @@ function DeliveryForm() {
                                     <>
                                         <fieldset className="form-group">
                                             <legend>¿Solucionado?</legend>
-                                            <div className="form-row">
-                                                <div className="form-group col-md-6">
+                                            <div className="radio-group">
+                                               
                                                     <div className="custom-control custom-radio">
                                                         <input
                                                             type="radio"
@@ -677,8 +740,8 @@ function DeliveryForm() {
                                                         />
                                                         <label className="custom-control-label" htmlFor="issueResolvedYes">Sí</label>
                                                     </div>
-                                                </div>
-                                                <div className="form-group col-md-6">
+                                                
+                                                
                                                     <div className="custom-control custom-radio">
                                                         <input
                                                             type="radio"
@@ -691,7 +754,7 @@ function DeliveryForm() {
                                                         />
                                                         <label className="custom-control-label" htmlFor="issueResolvedNo">No</label>
                                                     </div>
-                                                </div>
+                                                
                                             </div>
                                         </fieldset>
     
@@ -710,6 +773,41 @@ function DeliveryForm() {
                                         )}
                                     </>
                                 )}
+
+                                {/* Alineamos los campos Cliente Conforme e Incidencia en paralelo */}
+                                <fieldset className="form-group">
+                                    <legend>¿Cliente Conforme?</legend>
+                                    <div className="radio-group">
+                                        
+                                            <div className="custom-control custom-radio">
+                                                <input
+                                                    type="radio"
+                                                    id="clientConformityYes"
+                                                    name="clientConformity"
+                                                    className="custom-control-input"
+                                                    value="Sí"
+                                                    checked={clientConformity === 'Sí'}
+                                                    onChange={(e) => setClientConformity(e.target.value)}
+                                                />
+                                                <label className="custom-control-label" htmlFor="clientConformityYes">Sí</label>
+                                            
+                                        </div>
+                                      
+                                            <div className="custom-control custom-radio">
+                                                <input
+                                                    type="radio"
+                                                    id="clientConformityNo"
+                                                    name="clientConformity"
+                                                    className="custom-control-input"
+                                                    value="No"
+                                                    checked={clientConformity === 'No'}
+                                                    onChange={(e) => setClientConformity(e.target.value)}
+                                                />
+                                                <label className="custom-control-label" htmlFor="clientConformityNo">No</label>
+                                            </div>
+                                        
+                                    </div>
+                                </fieldset>
     
                                 <div className="form-group">
                                     <label htmlFor="completionPhotos">Foto de Finalización</label>

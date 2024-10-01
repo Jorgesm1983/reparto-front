@@ -9,7 +9,7 @@ const Login = ({ setToken }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8000/api/login/', { username, password });
+            const response = await axios.post('http://192.168.1.40:8000/api/login/', { username, password });
             const token = response.data.token;
             localStorage.setItem('token', token);  // Guarda el token
             setToken(token);
