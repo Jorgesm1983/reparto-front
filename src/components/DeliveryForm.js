@@ -334,11 +334,11 @@ const fetchClientName = async (clientNumber) => {
         if (response.data.name) {
             setClientName(response.data.name); // Asignamos el nombre del cliente si lo encontramos
         } else {
-            setClientName(''); // Limpiamos el nombre si no se encuentra
+            setClientName('Cliente no encontrado'); // Limpiamos el nombre si no se encuentra
         }
     } catch (error) {
         console.error('Error obteniendo el nombre del cliente:', error);
-        setClientName(''); // Limpiamos el nombre en caso de error
+        setClientName('Cliente no encontrado'); // Limpiamos el nombre en caso de error
     }
 };
 
@@ -383,7 +383,7 @@ const fetchProductDescription = async (index, value) => {
 
     // Función para manejar el cambio en los productos afectados
     const handleIssueChange = (index, value) => {
-        const intValue = parseInt(value, 10);
+        // const intValue = parseInt(value, 10);
         const newIssues = [...issues];
         newIssues[index] = value; // Convertir a entero
         setIssues(newIssues);
@@ -419,7 +419,8 @@ const fetchProductDescription = async (index, value) => {
         }
         if (
             (visitType === 'delivery' && (clientConformity === 'No' || hasIssue === 'Sí')) ||
-            ((visitType === 'verification' || visitType === 'resolution') && is_resolved === 'No')
+            ((visitType === 'verification' || visitType === 'resolution') && is_resolved === 'No') ||
+            ((visitType === 'verification' || visitType === 'resolution') && clientConformity === 'No') // Nueva validación para "verification" y "resolution"
         ) {
             if (!observations) {
                 newErrors.observations = 'Las observaciones son obligatorias en este caso.';
@@ -429,6 +430,8 @@ const fetchProductDescription = async (index, value) => {
         if (visitType === 'delivery' && hasIssue === 'Sí' && issues.every(issue => issue === '')) {
             newErrors.issues = 'Debe ingresar al menos un número de producto si hay una incidencia.';
         }
+
+        
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -513,6 +516,8 @@ const fetchProductDescription = async (index, value) => {
         setErrors({});
         setMessage('');
         setTouched({});
+        setClientName('');  // Limpiar el nombre del cliente
+        setProductDescriptions([]);  // Limpiar las descripciones de los productos
 
         if (completionPhotosRef.current) {
             completionPhotosRef.current.value = '';
@@ -526,7 +531,11 @@ const fetchProductDescription = async (index, value) => {
     return (
         
         <div className="container mt-5">
+            <div class="logo-container">
+                <img src="/logo.png" alt="Logo de la empresa"></img>
+                </div>
             <div className="card">
+                
                 <div className="card-header">
                     Formulario de Entrega
                 </div>
@@ -656,6 +665,7 @@ const fetchProductDescription = async (index, value) => {
                                                         multiple
                                                         ref={issuePhotosRef}
                                                         onChange={(e) => setIssuePhotos([...e.target.files])}
+                                                        required
                                                     />
                                                 </div>
                                                 <div className="form-group">
@@ -768,6 +778,7 @@ const fetchProductDescription = async (index, value) => {
                                                     multiple
                                                     ref={issuePhotosRef}
                                                     onChange={(e) => setIssuePhotos([...e.target.files])}
+                                                    required
                                                 />
                                             </div>
                                         )}
@@ -809,7 +820,7 @@ const fetchProductDescription = async (index, value) => {
                                     </div>
                                 </fieldset>
     
-                                <div className="form-group">
+                                <div className="form-group file">
                                     <label htmlFor="completionPhotos">Foto de Finalización</label>
                                     <input
                                         type="file"
@@ -818,7 +829,9 @@ const fetchProductDescription = async (index, value) => {
                                         multiple
                                         ref={completionPhotosRef}
                                         onChange={(e) => setCompletionPhotos([...e.target.files])}
+                                        required
                                     />
+                                    
                                 </div>
     
                                 <div className="form-group">
@@ -836,7 +849,7 @@ const fetchProductDescription = async (index, value) => {
                             </>
                         )}
     
-                        <button type="submit" className="btn btn-primary">Enviar</button>
+                        <button type="submit" className="btn btn-primary btn-block">Enviar</button>
                     </form>
                 </div>
             </div>
@@ -844,3 +857,8 @@ const fetchProductDescription = async (index, value) => {
     );
 }    
 export default DeliveryForm;
+
+
+
+// en pantalla pequeña cuando se carga la descripción del artículo se descuadran los botones de añadir o eliminar.
+// Darle una vuelta al botón de subida de archivo.
