@@ -1,305 +1,6 @@
-
-// import React, { useState, useEffect, useRef, useCallback} from 'react';
-// import axios from 'axios';
-
-// function DeliveryForm() {
-//     const [fiscalYear, setFiscalYear] = useState('');
-//     const [deliveryNumber, setDeliveryNumber] = useState('');
-//     const [clientConformity, setClientConformity] = useState('Sí');
-//     const [hasIssue, setHasIssue] = useState('No');
-//     const [observations, setObservations] = useState('');
-//     const [issues, setIssues] = useState(['']);
-//     const [errors, setErrors] = useState({});
-//     const [message, setMessage] = useState('');
-//     const [touched, setTouched] = useState({});
-//     const [completionPhotos, setCompletionPhotos] = useState([]);
-//     const [issuePhotos, setIssuePhotos] = useState([]);
-
-//     const completionPhotosRef = useRef(null);
-//     const issuePhotosRef = useRef(null);
-
-//     const handleIssueChange = (index, value) => {
-//         const newIssues = [...issues];
-//         newIssues[index] = value;
-//         setIssues(newIssues);
-//     };
-
-//     const validateForm = useCallback(() => {
-//         const newErrors = {};
-
-//         if (touched.fiscalYear && !/^\d{4}$/.test(fiscalYear)) {
-//             newErrors.fiscalYear = 'El año fiscal debe tener 4 dígitos.';
-//         }
-
-//         if (touched.deliveryNumber && !/^\d+$/.test(deliveryNumber)) {
-//             newErrors.deliveryNumber = 'El campo del albarán solo puede contener números.';
-//         }
-
-//         if ((clientConformity === 'No' || hasIssue === 'Sí') && !observations) {
-//             newErrors.observations = 'Las observaciones son obligatorias si el cliente no está conforme o hay una incidencia.';
-//         }
-
-//         if (hasIssue === 'Sí' && issues.every(issue => issue === '')) {
-//             newErrors.issues = 'Debe ingresar al menos un número de producto si hay una incidencia.';
-//         }
-
-//         setErrors(newErrors);
-//         return Object.keys(newErrors).length === 0;
-//     }, [touched, fiscalYear, deliveryNumber, clientConformity, hasIssue, observations, issues]); 
-
-//     useEffect(() => {
-//         validateForm();
-//     }, [clientConformity, hasIssue, observations, validateForm]);
-
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         setTouched({
-//             fiscalYear: true,
-//             deliveryNumber: true,
-//             observations: true,
-//         });
-
-//         if (!validateForm()) {
-//             console.log('Errores de validación', errors);
-//             return;
-//         }
-
-//         const formData = new FormData();
-//         formData.append('fiscal_year', fiscalYear);
-//         formData.append('delivery_number', deliveryNumber);
-//         formData.append('client_conformity', clientConformity === 'Sí');
-//         formData.append('has_issue', hasIssue === 'Sí');
-//         formData.append('observations', observations);
-
-//         formData.append('issues', JSON.stringify(issues.filter(issue => issue !== '')));
-
-//         completionPhotos.forEach(photo => formData.append('delivery_images', photo));
-//         if (hasIssue === 'Sí') {
-//             issuePhotos.forEach(photo => formData.append('issue_photos', photo));
-//         }
-
-//         try {
-//             await axios.post('http://localhost:8000/api/deliveries/', formData, {
-//                 headers: {
-//                     'Content-Type': 'multipart/form-data',
-//                     'X-Requested-With': 'XMLHttpRequest',
-//                 }
-//             });
-
-//             setMessage('Entrega registrada con éxito.');
-//             setTimeout(() => {
-//                 resetForm();
-//             }, 1000);
-
-//         } catch (error) {
-//             console.error('Error registrando la entrega:', error);
-//             setMessage('Error al registrar la entrega. Intenta de nuevo.');
-//         }
-//     };
-
-//     const resetForm = () => {
-//         setFiscalYear('');
-//         setDeliveryNumber('');
-//         setClientConformity('Sí');
-//         setHasIssue('No');
-//         setObservations('');
-//         setIssues(['']);
-//         setCompletionPhotos([]);
-//         setIssuePhotos([]);
-//         setErrors({});
-//         setMessage('');
-//         setTouched({});
-
-//         if (completionPhotosRef.current) {
-//             completionPhotosRef.current.value = '';
-//         }
-//         if (issuePhotosRef.current) {
-//             issuePhotosRef.current.value = '';
-//         }
-//     };
-
-//     return (
-//         <div className="container mt-5">
-//             <div className="card">
-//                 <div className="card-header">
-//                     Formulario de Entrega
-//                 </div>
-//                 {message && (
-//                     <div className={`alert ${message.includes('éxito') ? 'alert-success' : 'alert-danger'}`}>
-//                         {message}
-//                     </div>
-//                 )}
-//                 <div className="card-body">
-//                     <form onSubmit={handleSubmit}>
-//                         <div className="form-row">
-//                             <div className="form-group col-md-6">
-//                                 <label htmlFor="fiscalYear">Año Fiscal</label>
-//                                 <input
-//                                     type="text"
-//                                     className={`form-control ${errors.fiscalYear ? 'is-invalid' : ''}`}
-//                                     id="fiscalYear"
-//                                     value={fiscalYear}
-//                                     onChange={(e) => setFiscalYear(e.target.value)}
-//                                     onBlur={() => setTouched(prev => ({ ...prev, fiscalYear: true }))}
-//                                     placeholder="Ej: 2024"
-//                                 />
-//                                 {errors.fiscalYear && <div className="invalid-feedback">{errors.fiscalYear}</div>}
-//                             </div>
-//                             <div className="form-group col-md-6">
-//                                 <label htmlFor="deliveryNumber">Número del Albarán</label>
-//                                 <input
-//                                     type="text"
-//                                     className={`form-control ${errors.deliveryNumber ? 'is-invalid' : ''}`}
-//                                     id="deliveryNumber"
-//                                     value={deliveryNumber}
-//                                     onChange={(e) => setDeliveryNumber(e.target.value)}
-//                                     onBlur={() => setTouched(prev => ({ ...prev, deliveryNumber: true }))}
-//                                     placeholder="Ej: 12345"
-//                                 />
-//                                 {errors.deliveryNumber && <div className="invalid-feedback">{errors.deliveryNumber}</div>}
-//                             </div>
-//                         </div>
-//                         <fieldset className="form-group">
-//                             <legend>Conformidad del Cliente</legend>
-//                             <div className="form-row">
-//                                 <div className="form-group col-md-6">
-//                                     <div className="custom-control custom-radio">
-//                                         <input
-//                                             type="radio"
-//                                             id="clientConformityYes"
-//                                             name="clientConformity"
-//                                             className="custom-control-input"
-//                                             value="Sí"
-//                                             checked={clientConformity === 'Sí'}
-//                                             onChange={(e) => setClientConformity(e.target.value)}
-//                                         />
-//                                         <label className="custom-control-label" htmlFor="clientConformityYes">Sí</label>
-//                                     </div>
-//                                 </div>
-//                                 <div className="form-group col-md-6">
-//                                     <div className="custom-control custom-radio">
-//                                         <input
-//                                             type="radio"
-//                                             id="clientConformityNo"
-//                                             name="clientConformity"
-//                                             className="custom-control-input"
-//                                             value="No"
-//                                             checked={clientConformity === 'No'}
-//                                             onChange={(e) => setClientConformity(e.target.value)}
-//                                         />
-//                                         <label className="custom-control-label" htmlFor="clientConformityNo">No</label>
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         </fieldset>
-//                         <fieldset className="form-group">
-//                             <legend>Incidencia</legend>
-//                             <div className="form-row">
-//                                 <div className="form-group col-md-6">
-//                                     <div className="custom-control custom-radio">
-//                                         <input
-//                                             type="radio"
-//                                             id="hasIssueYes"
-//                                             name="hasIssue"
-//                                             className="custom-control-input"
-//                                             value="Sí"
-//                                             checked={hasIssue === 'Sí'}
-//                                             onChange={(e) => setHasIssue(e.target.value)}
-//                                         />
-//                                         <label className="custom-control-label" htmlFor="hasIssueYes">Sí</label>
-//                                     </div>
-//                                 </div>
-//                                 <div className="form-group col-md-6">
-//                                     <div className="custom-control custom-radio">
-//                                         <input
-//                                             type="radio"
-//                                             id="hasIssueNo"
-//                                             name="hasIssue"
-//                                             className="custom-control-input"
-//                                             value="No"
-//                                             checked={hasIssue === 'No'}
-//                                             onChange={(e) => setHasIssue(e.target.value)}
-//                                         />
-//                                         <label className="custom-control-label" htmlFor="hasIssueNo">No</label>
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         </fieldset>
-//                         {hasIssue === 'Sí' && (
-//                             <>
-//                                 <div className="form-group">
-//                                     <label htmlFor="issues">Número(s) de Producto con Incidencia</label>
-//                                     {issues.map((issue, index) => (
-//                                         <div key={index} className="input-group mb-2">
-//                                             <input
-//                                                 type="text"
-//                                                 className="form-control"
-//                                                 value={issue}
-//                                                 onChange={(e) => handleIssueChange(index, e.target.value)}
-//                                                 placeholder={`Producto ${index + 1}`}
-//                                             />
-//                                             <div className="input-group-append">
-//                                                 <button
-//                                                     type="button"
-//                                                     className="btn btn-outline-secondary"
-//                                                     onClick={() => setIssues([...issues, ''])}
-//                                                 >
-//                                                     +
-//                                                 </button>
-//                                             </div>
-//                                         </div>
-//                                     ))}
-//                                 </div>
-//                                 {errors.issues && <div className="text-danger">{errors.issues}</div>}
-//                                 <div className="form-group">
-//                                     <label htmlFor="issuePhotos">Fotos de Incidencia (opcional)</label>
-//                                     <input
-//                                         type="file" name="issue_photos"
-//                                         className={`form-control-file ${errors.issuePhotos ? 'is-invalid' : ''}`}
-//                                         id="issuePhotos"
-//                                         ref={issuePhotosRef}
-//                                         multiple
-//                                         onChange={(e) => setIssuePhotos([...e.target.files])}
-//                                     />
-//                                 </div>
-//                             </>
-//                         )}
-//                         <div className="form-group">
-//                             <label htmlFor="completionPhotos">Fotos de Finalización de Trabajo (obligatorio)</label>
-//                             <input
-//                                 type="file" name="delivery_image"
-//                                 className={`form-control-file ${errors.completionPhotos ? 'is-invalid' : ''}`}
-//                                 id="completionPhotos"
-//                                 ref={completionPhotosRef}
-//                                 multiple
-//                                 onChange={(e) => setCompletionPhotos([...e.target.files])}
-//                                 required
-//                             />
-//                             {errors.completionPhotos && <div className="invalid-feedback">{errors.completionPhotos}</div>}
-//                         </div>
-//                         <div className="form-group">
-//                             <label htmlFor="observations">Observaciones</label>
-//                             <textarea
-//                                 className={`form-control ${errors.observations ? 'is-invalid' : ''}`}
-//                                 id="observations"
-//                                 value={observations}
-//                                 onChange={(e) => setObservations(e.target.value)}
-//                                 onBlur={() => setTouched(prev => ({ ...prev, observations: true }))}
-//                             />
-//                             {errors.observations && <div className="invalid-feedback">{errors.observations}</div>}
-//                         </div>
-//                         <button type="submit" className="btn btn-primary">Enviar</button>
-//                     </form>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default DeliveryForm;
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 function DeliveryForm() {
     const [visitType, setVisitType] = useState('');
@@ -324,12 +25,14 @@ function DeliveryForm() {
     
 // Función para buscar el nombre del cliente basado en el número de cliente
 const fetchClientName = async (clientNumber) => {
-    const token = localStorage.getItem('token');  // Obtén el token almacenado
+    
     try {
+        const csrfToken = Cookies.get('csrftoken'); // Asegúrate de obtener el token CSRF desde las cookies
         const response = await axios.get(`http://192.168.1.40:8000/api/customer/${clientNumber}/`, {
             headers: {
-                'Authorization': `Token ${token}`  // Agrega el token de autenticación
-            }
+                'X-CSRFToken': csrfToken, // Incluye el CSRF token si es necesario
+            },
+            withCredentials: true, // Esto asegura que las cookies de sesión se envíen con la solicitud
         });
         if (response.data.name) {
             setClientName(response.data.name); // Asignamos el nombre del cliente si lo encontramos
@@ -357,12 +60,14 @@ const handleClientNumberChange = (event) => {
 
 // Función para buscar la descripción del producto basado en el número de producto
 const fetchProductDescription = async (index, value) => {
-    const token = localStorage.getItem('token');  // Obtén el token almacenado
+    
     try {
+        const csrfToken = Cookies.get('csrftoken'); // Asegúrate de obtener el token CSRF desde las cookies
         const response = await axios.get(`http://192.168.1.40:8000/api/product/${value}/`, {
             headers: {
-                'Authorization': `Token ${token}`  // Agrega el token de autenticación
-            }
+                'X-CSRFToken': csrfToken, // Incluye el CSRF token si es necesario
+            },
+            withCredentials: true, // Esto asegura que las cookies de sesión se envíen con la solicitud
         });
         if (response.data.description) {
             const newProductDescriptions = [...productDescriptions];
@@ -467,7 +172,7 @@ const fetchProductDescription = async (index, value) => {
         formData.append('is_resolved', is_resolved === 'Sí');  // Convertir a booleano
         completionPhotos.forEach(photo => formData.append('delivery_images', photo));
 
-        const token = localStorage.getItem('token');  // Obtén el token del localStorage
+
 
         if (hasIssue === 'Sí' && issues.length > 0) {
             issues.forEach(issue => {
@@ -481,12 +186,14 @@ const fetchProductDescription = async (index, value) => {
         }
 
         try {
+            const csrfToken = Cookies.get('csrftoken'); // Obtener el CSRF token de las cookies
             await axios.post('http://192.168.1.40:8000/api/deliveries/', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Authorization': `Token ${token}`,
-                }
+            headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken, // Incluye el token CSRF para la protección
+        },
+        withCredentials: true, 
             });
 
             setMessage('Entrega registrada con éxito.');

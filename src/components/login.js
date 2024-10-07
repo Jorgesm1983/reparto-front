@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
+
 
 const Login = ({ setToken }) => {
     const [username, setUsername] = useState('');
@@ -8,15 +10,24 @@ const Login = ({ setToken }) => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('http://192.168.1.40:8000/api/login/', { username, password });
-            const token = response.data.token;
-            localStorage.setItem('token', token);  // Guarda el token
-            setToken(token);
-        } catch (err) {
-            setError('Error al iniciar sesión. Verifica tus credenciales.');
-        }
-    };
+    try {
+        const csrfToken = Cookies.get('csrftoken');
+        await axios.post(
+            'http://192.168.1.40:8000/api/login/',
+            { username, password },
+            {
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true, // Esto asegura que las cookies se envíen con la solicitud
+            }
+        );
+        setToken('authenticated');
+    } catch (err) {
+        setError('Error al iniciar sesión. Verifica tus credenciales.');
+    }
+};
 
     return (
         <div className="container mt-5">
