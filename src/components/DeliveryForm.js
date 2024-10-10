@@ -11,7 +11,7 @@ function DeliveryForm() {
     const [clientConformity, setClientConformity] = useState('Sí');
     const [hasIssue, setHasIssue] = useState('No');
     const [observations, setObservations] = useState('');
-    const [issues, setIssues] = useState([0]);
+    const [issues, setIssues] = useState(['']);
     const [productDescriptions, setProductDescriptions] = useState([]); // Estado para las descripciones de productos
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
@@ -170,37 +170,47 @@ const fetchProductDescription = async (index, value) => {
         formData.append('has_issue', hasIssue === 'Sí');
         formData.append('observations', observations);
         formData.append('is_resolved', is_resolved === 'Sí');  // Convertir a booleano
-        completionPhotos.forEach(photo => formData.append('delivery_images', photo));
-
-
-
+        completionPhotos.forEach((photo, index) => {
+            formData.append('uploaded_delivery_images', photo);
+            console.log(`Añadiendo imagen de entrega [${index}]:`, photo);
+        });
+        
+        // Si hay problemas y se seleccionaron productos con incidencia, agregarlos a `issues`
         if (hasIssue === 'Sí' && issues.length > 0) {
-            issues.forEach(issue => {
+            issues.forEach((issue, index) => {
                 if (!isNaN(issue)) {
-                    formData.append('issues', issue);
+                    formData.append(`issues[${index}]`, issue);
+                    console.log(`Añadiendo problema [${index}]:`, issue);
                 }
             });
-        }  
-        if (hasIssue === 'Sí' || is_resolved === 'No') {
-            issuePhotos.forEach(photo => formData.append('issue_photos', photo));
         }
-
+        
+        // Agregar fotos de incidencia a `uploaded_issue_photos` si hay incidencia o si no está resuelto
+        if (hasIssue === 'Sí' || is_resolved === 'No') {
+            
+            issuePhotos.forEach((photo, index) => {
+                formData.append('uploaded_issue_photos', photo);
+                console.log(`Añadiendo foto de incidencia [${index}]:`, photo);
+            });
+        }
+        
         try {
             const csrfToken = Cookies.get('csrftoken'); // Obtener el CSRF token de las cookies
-            await axios.post('http://192.168.1.40:8000/api/deliveries/', formData, {
-            headers: {
-            'Content-Type': 'multipart/form-data',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrfToken, // Incluye el token CSRF para la protección
-        },
-        withCredentials: true, 
+            const response = await axios.post('http://192.168.1.40:8000/api/deliveries/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken, // Incluye el token CSRF para la protección
+                },
+                withCredentials: true, 
             });
-
+        
+            console.log('Respuesta del servidor:', response.data);
             setMessage('Entrega registrada con éxito.');
             setTimeout(() => {
                 resetForm();
             }, 1000);
-
+        
         } catch (error) {
             console.error('Error registrando la entrega:', error);
             setMessage('Error al registrar la entrega. Intenta de nuevo.');

@@ -1,0 +1,39 @@
+.admin-container {
+    padding: 20px;
+}
+
+.delivery-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.delivery-item {
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.issue-highlight {
+    background-color: #ffcccc;
+}
+
+.delivery-details {
+    margin-top: 20px;
+}
+
+.gallery {
+    margin-top: 20px;
+}
+
+.incident-form {
+    margin-top: 20px;
+}
+
+.error {
+    color: red;
+}
+
+.success {
+    color: green;
+}
