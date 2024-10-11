@@ -1,29 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import ImageGallery from 'react-image-gallery';
-import 'react-image-gallery/styles/css/image-gallery.css';
 import './AdminPage.css';
-
-// Función para construir la URL de las imágenes de entrega e incidencia
-const constructImageUrl = (imageUrl) => {
-    // Si la URL ya es completa (incluye http o https), la devolvemos tal cual.
-    if (imageUrl.startsWith('http')) {
-        return imageUrl;
-    }
-    // De lo contrario, construimos la URL usando la base de la ruta.
-    return `http://192.168.1.40:8000${imageUrl}`;
-};
 
 const AdminPage = () => {
     const [deliveries, setDeliveries] = useState([]);
     const [selectedDeliveryId, setSelectedDeliveryId] = useState(null);
     const [incidentNumber, setIncidentNumber] = useState('');
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(true);
-
-    const DELIVERY_IMAGE_BASE_PATH = 'http://192.168.1.40:8000/media/deliveries/';
-    const ISSUE_IMAGE_BASE_PATH = 'http://192.168.1.40:8000/media/issues/';
 
     useEffect(() => {
         fetchRecentDeliveries();
@@ -34,10 +19,10 @@ const AdminPage = () => {
             const response = await axios.get('http://192.168.1.40:8000/api/recent_deliveries/', {
                 withCredentials: true,
             });
-            console.log('Datos de la API:', response.data);
-            setDeliveries(response.data);
+            const sortedDeliveries = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            setDeliveries(sortedDeliveries);
         } catch (error) {
-            console.error('Error fetching deliveries:', error);
+            console.error('Error al obtener los albaranes:', error);
             setError('Error al obtener los albaranes.');
         } finally {
             setLoading(false);
@@ -70,116 +55,107 @@ const AdminPage = () => {
     };
 
     const toggleDeliveryDetails = (deliveryId) => {
-        console.log(`Toggling delivery details for ID: ${deliveryId}`);
-        setSelectedDeliveryId(prevId => (prevId === deliveryId ? null : deliveryId));
+        setSelectedDeliveryId((prevId) => (prevId === deliveryId ? null : deliveryId));
     };
 
-    const formatDateTime = (dateTimeString) => {
-        const date = new Date(dateTimeString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = String(date.getFullYear()).slice(-2);
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    const isDeliverySelected = (deliveryId) => {
+        return selectedDeliveryId === deliveryId;
     };
 
     return (
-        <div className="admin-container">
+        <div className="admin-dashboard">
             <h2>Administración de Albaranes</h2>
             {loading ? (
-                <div>Cargando albaranes...</div>
-            ) : error ? (
-                <div className="alert alert-danger">{error}</div>
+                <p>Cargando albaranes...</p>
             ) : (
                 <div className="delivery-list">
-                    {deliveries.length > 0 ? (
-                        deliveries.map((delivery) => (
-                            <div key={delivery.id} className={`delivery-item ${delivery.has_issue ? 'issue-highlight' : ''}`}>
-                                <div className="delivery-summary" onClick={() => toggleDeliveryDetails(delivery.id)}>
-                                    <span>Albarán: {delivery.fiscal_year}/{delivery.delivery_number} </span>
-                                    <span>Cliente: {delivery.client_number_display} - {delivery.customer_name} </span>
-                                    <span>Tipo de visita: {delivery.visit_type} </span>
-                                    <span>Estado: {delivery.status} </span>
-                                    <span>Fecha: {formatDateTime(delivery.created_at)} </span>
-                                    {delivery.has_issue && (
-                                        <span className="text-danger">Incidencia </span>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Albarán</th>
+                                <th>Cliente</th>
+                                <th>Tipo de Visita</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {deliveries.map((delivery) => (
+                                <React.Fragment key={delivery.id}>
+                                    <tr
+                                        className={delivery.has_issue ? 'issue-highlight' : ''}
+                                        onClick={() => toggleDeliveryDetails(delivery.id)}
+                                    >
+                                        <td>{delivery.fiscal_year}/{delivery.delivery_number}</td>
+                                        <td>{delivery.customer_name}</td>
+                                        <td>{delivery.visit_type}</td>
+                                        <td>{delivery.status}</td>
+                                        <td>{new Date(delivery.created_at).toLocaleString()}</td>
+                                    </tr>
+                                    {isDeliverySelected(delivery.id) && (
+                                        <tr className="delivery-details-row">
+                                            <td colSpan="5">
+                                                <div className="delivery-details">
+                                                    <h3>Detalles del Albarán</h3>
+                                                    <p><strong>Cliente:</strong> {delivery.customer_name}</p>
+                                                    <p><strong>Observaciones:</strong> {delivery.observations || 'Ninguna'}</p>
+
+                                                    <h4>Imágenes de la Entrega</h4>
+                                                    <div className="image-thumbnails">
+                                                        {delivery.delivery_images.map((img, index) => (
+                                                            <img
+                                                                key={index}
+                                                                src={img.url}
+                                                                alt={`Entrega ${index + 1}`}
+                                                                className="thumbnail"
+                                                                onClick={() => window.open(img.url, '_blank')}
+                                                            />
+                                                        ))}
+                                                    </div>
+
+                                                    <h4>Fotos de la Incidencia</h4>
+                                                    <div className="image-thumbnails">
+                                                        {delivery.issue_photos.map((img, index) => (
+                                                            <img
+                                                                key={index}
+                                                                src={img.url}
+                                                                alt={`Incidencia ${index + 1}`}
+                                                                className="thumbnail"
+                                                                onClick={() => window.open(img.url, '_blank')}
+                                                            />
+                                                        ))}
+                                                    </div>
+
+                                                    {delivery.has_issue && (
+                                                        <div className="incident-form">
+                                                            <label htmlFor="incident-number">Número de Incidencia:</label>
+                                                            <input
+                                                                type="text"
+                                                                id="incident-number"
+                                                                value={incidentNumber}
+                                                                onChange={handleIncidentNumberChange}
+                                                                className="form-control"
+                                                            />
+                                                            <button 
+                                                                onClick={() => handleIncidentSubmit(delivery.id)}
+                                                                className="btn btn-primary"
+                                                            >
+                                                                Asignar Número de Incidencia
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
                                     )}
-                                    {delivery.observations && (
-                                        <span className="text-muted">Observaciones: {delivery.observations} </span>
-                                    )}
-                                </div>
-                                {selectedDeliveryId === delivery.id && (
-                                    <div className="delivery-details">
-                                        <h4>Imágenes de la entrega</h4>
-                                        {console.log('Imágenes de la entrega:', delivery.delivery_images)}
-                                        <ImageGallery 
-                                            items={delivery.delivery_images ? delivery.delivery_images.map((img) => {
-                                                console.log('Procesando imagen de entrega:', img.image);
-                                                const imageUrl = img.image.startsWith('http')
-                                                ? img.image
-                                                : constructImageUrl(
-                                                    ISSUE_IMAGE_BASE_PATH,
-                                                    delivery.fiscal_year,
-                                                    delivery.delivery_number,
-                                                    img.image
-                                                );
-                                    
-                                            return {
-                                                original: imageUrl,
-                                                thumbnail: imageUrl,
-                                            };
-                                        }) : []}
-                                    />
-                                        <h4>Fotos de la incidencia</h4>
-                                        {console.log('Fotos de la incidencia:', delivery.issue_photos)}
-                                        <ImageGallery 
-                                            items={delivery.issue_photos ? delivery.issue_photos.map((img) => {
-                                                console.log('Procesando foto de incidencia:', img.image);
-                                                const imageUrl = img.image.startsWith('http')
-                                                ? img.image
-                                                : constructImageUrl(
-                                                    ISSUE_IMAGE_BASE_PATH,
-                                                    delivery.fiscal_year,
-                                                    delivery.delivery_number,
-                                                    img.image
-                                                );
-                                    
-                                            return {
-                                                original: imageUrl,
-                                                thumbnail: imageUrl,
-                                            };
-                                        }) : []}
-                                    />
-                                        {delivery.has_issue && (
-                                            <div className="incident-form">
-                                                <label htmlFor="incident-number">Número de Incidencia:</label>
-                                                <input
-                                                    type="text"
-                                                    id="incident-number"
-                                                    value={incidentNumber}
-                                                    onChange={handleIncidentNumberChange}
-                                                    className="form-control"
-                                                />
-                                                <button 
-                                                    onClick={() => handleIncidentSubmit(delivery.id)}
-                                                    className="btn btn-primary"
-                                                >
-                                                    Asignar Número de Incidencia
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))
-                    ) : (
-                        <p>No se encontraron albaranes recientes.</p>
-                    )}
+                                </React.Fragment>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
-            {error && <div className="error">{error}</div>}
-            {success && <div className="success">{success}</div>}
+            {error && <div className="alert alert-danger">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
         </div>
     );
 };
