@@ -41,28 +41,63 @@
     margin-top: 10px;
 }
 
-.image-thumbnails {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+.image-containers {
+   display: flex;
+    gap: 20px;
+    flex-wrap: wrap; 
+    justify-content: space-between;
+
+}
+
+.image-slider {
+    flex: 1;
+    max-width: 600px;
+    width: 100%;
+    overflow: hidden; /* Evitar que las imágenes se desborden */
+    padding: 10px;
+    box-sizing: border-box;
+ 
+    height: 350px; /* Ajusta la altura según el diseño deseado */
+}
+.image-slide img {
+    width: 100%;
+    max-height: 300px; /* Ajusta la altura máxima de la imagen */
+    object-fit: contain; /* Asegura que la imagen se ajuste dentro del contenedor sin cortarse */
+    cursor: pointer;
+    border-radius: 5px;
+    display: block;
+}
+
+.custom-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 50%;
+    padding: 5px;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.custom-next {
+    right: 10px;
+}
+
+.custom-prev {
+    left: 10px;
 }
 
 .thumbnail {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: auto;
+    max-height: 200px; /* Ajusta la altura máxima de las miniaturas */
     object-fit: cover;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: transform 0.2s;
 }
 
 .thumbnail:hover {
     transform: scale(1.05);
-}
-
-.incident-form {
-    margin-top: 20px;
+    transition: transform 0.2s;
 }
 
 .alert {
@@ -79,4 +114,23 @@
 .alert-success {
     background-color: #d4edda;
     color: #155724;
+}
+
+/* Ajustes adicionales para sliders */
+.image-slider .slick-list {
+    overflow: hidden !important; /* Asegura que las imágenes no se desborden */
+    padding: 0;
+}
+
+.image-slider .slick-track {
+    display: flex;
+    align-items: center;
+   
+}
+
+.image-slider .slick-slide {
+    display: flex;
+    justify-content: center;
+    max-width: 100%; /* Evitar que las imágenes se salgan del slider */
+    box-sizing: border-box;
 }

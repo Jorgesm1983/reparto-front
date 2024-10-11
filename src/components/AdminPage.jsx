@@ -1,6 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Slider from 'react-slick';
+import Lightbox from 'yet-another-react-lightbox';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import 'yet-another-react-lightbox/dist/styles.css';
 import './AdminPage.css';
+import Cookies from 'js-cookie';
+
+const NextArrow = ({ onClick }) => (
+    <div className="custom-arrow custom-next" onClick={onClick}>
+        &rarr;
+    </div>
+);
+
+const PrevArrow = ({ onClick }) => (
+    <div className="custom-arrow custom-prev" onClick={onClick}>
+        &larr;
+    </div>
+);
+
+const getSliderSettings = (imagesLength) => ({
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 1, // Siempre mostrar una sola imagen
+    slidesToScroll: 1,
+    arrows: imagesLength > 1,
+    nextArrow: imagesLength > 1 ? <NextArrow /> : null,
+    prevArrow: imagesLength > 1 ? <PrevArrow /> : null,
+    adaptiveHeight: true,
+    variableWidth: false,
+    responsive: [
+        {
+            breakpoint: 768,
+            settings: {
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                arrows: imagesLength > 1,
+            }
+        }
+    ]
+});
+
 
 const AdminPage = () => {
     const [deliveries, setDeliveries] = useState([]);
@@ -9,6 +51,8 @@ const AdminPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxImages, setLightboxImages] = useState([]);
 
     useEffect(() => {
         fetchRecentDeliveries();
@@ -40,27 +84,51 @@ const AdminPage = () => {
         }
 
         try {
+            const csrfToken = Cookies.get('csrftoken');
             await axios.post(
-                `http://192.168.1.40:8000/api/update_incident/${deliveryId}/`, 
+                `http://192.168.1.40:8000/api/update_incident/${deliveryId}/`,
                 { incident_number: incidentNumber },
-                { withCredentials: true }
+                {
+                    withCredentials: true,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    },
+                }
             );
-            setSuccess('Número de incidencia asignado correctamente.');
-            setError('');
-            fetchRecentDeliveries();
         } catch (error) {
             setError('Error al asignar el número de incidencia.');
             console.error(error);
         }
+        setSuccess('Número de incidencia asignado correctamente.');
+        setError('');
+        fetchRecentDeliveries();
     };
 
     const toggleDeliveryDetails = (deliveryId) => {
         setSelectedDeliveryId((prevId) => (prevId === deliveryId ? null : deliveryId));
     };
 
-    const isDeliverySelected = (deliveryId) => {
-        return selectedDeliveryId === deliveryId;
+    const openLightbox = (images) => {
+        setLightboxImages(images.map((img) => ({ src: img.url || img.image })));
+        setLightboxOpen(true);
     };
+
+    const closeLightbox = () => {
+        setLightboxOpen(false);
+    };
+
+    const renderImages = (images) => (
+        images.map((img, index) => (
+            <div key={img.url || img.image} className="image-slide">
+                <img
+                    src={img.url || img.image}
+                    alt={`Imagen ${index + 1}`}
+                    className="thumbnail"
+                    onClick={() => openLightbox(images)}
+                />
+            </div>
+        ))
+    );
 
     return (
         <div className="admin-dashboard">
@@ -87,43 +155,40 @@ const AdminPage = () => {
                                         onClick={() => toggleDeliveryDetails(delivery.id)}
                                     >
                                         <td>{delivery.fiscal_year}/{delivery.delivery_number}</td>
-                                        <td>{delivery.customer_name}</td>
+                                        <td>{delivery.client_number_display} - {delivery.customer_name}</td>
                                         <td>{delivery.visit_type}</td>
                                         <td>{delivery.status}</td>
                                         <td>{new Date(delivery.created_at).toLocaleString()}</td>
                                     </tr>
-                                    {isDeliverySelected(delivery.id) && (
+                                    {selectedDeliveryId === delivery.id && (
                                         <tr className="delivery-details-row">
                                             <td colSpan="5">
                                                 <div className="delivery-details">
-                                                    <h3>Detalles del Albarán</h3>
-                                                    <p><strong>Cliente:</strong> {delivery.customer_name}</p>
-                                                    <p><strong>Observaciones:</strong> {delivery.observations || 'Ninguna'}</p>
-
-                                                    <h4>Imágenes de la Entrega</h4>
-                                                    <div className="image-thumbnails">
-                                                        {delivery.delivery_images.map((img, index) => (
-                                                            <img
-                                                                key={index}
-                                                                src={img.url}
-                                                                alt={`Entrega ${index + 1}`}
-                                                                className="thumbnail"
-                                                                onClick={() => window.open(img.url, '_blank')}
-                                                            />
+                                                    <h4>Observaciones:</h4>
+                                                    <p>{delivery.observations || 'Ninguna'}</p>
+                                                    
+                                                    <h4>Productos con Incidencia:</h4>
+                                                    <ul>
+                                                        {delivery.issues.map((issue, index) => (
+                                                            <li key={index}>
+                                                                E-{issue} Descripción del producto
+                                                            </li>
                                                         ))}
-                                                    </div>
+                                                    </ul>
 
-                                                    <h4>Fotos de la Incidencia</h4>
-                                                    <div className="image-thumbnails">
-                                                        {delivery.issue_photos.map((img, index) => (
-                                                            <img
-                                                                key={index}
-                                                                src={img.url}
-                                                                alt={`Incidencia ${index + 1}`}
-                                                                className="thumbnail"
-                                                                onClick={() => window.open(img.url, '_blank')}
-                                                            />
-                                                        ))}
+                                                    <div className="image-containers">
+                                                        <div className="image-slider">
+                                                            <h4>Finalización Entrega</h4>
+                                                            <Slider {...getSliderSettings(delivery.delivery_images.length)}>
+                                                                {renderImages(delivery.delivery_images)}
+                                                            </Slider>
+                                                        </div>
+                                                        <div className="image-slider">
+                                                            <h4>Fotos de la Incidencia</h4>
+                                                            <Slider {...getSliderSettings(delivery.issue_photos.length)}>
+                                                                {renderImages(delivery.issue_photos)}
+                                                            </Slider>
+                                                        </div>
                                                     </div>
 
                                                     {delivery.has_issue && (
@@ -153,6 +218,13 @@ const AdminPage = () => {
                         </tbody>
                     </table>
                 </div>
+            )}
+            {lightboxOpen && (
+                <Lightbox
+                    open={lightboxOpen}
+                    close={closeLightbox}
+                    slides={lightboxImages}
+                />
             )}
             {error && <div className="alert alert-danger">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
