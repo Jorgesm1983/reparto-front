@@ -179,7 +179,7 @@ const fetchProductDescription = async (index, value) => {
         if (hasIssue === 'Sí' && issues.length > 0) {
             issues.forEach((issue, index) => {
                 if (!isNaN(issue)) {
-                    formData.append(`issues[${index}]`, issue);
+                    formData.append('issues', issue);
                     console.log(`Añadiendo problema [${index}]:`, issue);
                 }
             });

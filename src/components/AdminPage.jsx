@@ -24,7 +24,7 @@ const getSliderSettings = (imagesLength) => ({
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 1, // Siempre mostrar una sola imagen
+    slidesToShow: 1,
     slidesToScroll: 1,
     arrows: imagesLength > 1,
     nextArrow: imagesLength > 1 ? <NextArrow /> : null,
@@ -43,7 +43,6 @@ const getSliderSettings = (imagesLength) => ({
     ]
 });
 
-
 const AdminPage = () => {
     const [deliveries, setDeliveries] = useState([]);
     const [selectedDeliveryId, setSelectedDeliveryId] = useState(null);
@@ -53,6 +52,8 @@ const AdminPage = () => {
     const [success, setSuccess] = useState('');
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxImages, setLightboxImages] = useState([]);
+    const [lightboxStartIndex, setLightboxStartIndex] = useState(0);
+
 
     useEffect(() => {
         fetchRecentDeliveries();
@@ -60,6 +61,7 @@ const AdminPage = () => {
 
     const fetchRecentDeliveries = async () => {
         try {
+            setLoading(true);
             const response = await axios.get('http://192.168.1.40:8000/api/recent_deliveries/', {
                 withCredentials: true,
             });
@@ -78,6 +80,13 @@ const AdminPage = () => {
     };
 
     const handleIncidentSubmit = async (deliveryId) => {
+        const delivery = deliveries.find(d => d.id === deliveryId);
+
+        if (delivery.incident_number) {
+            const confirmOverwrite = window.confirm('El albarán ya tiene un número de incidencia asignado. ¿Desea sobrescribirlo?');
+            if (!confirmOverwrite) return;
+        }
+
         if (!incidentNumber) {
             setError('Debe ingresar un número de incidencia.');
             return;
@@ -95,22 +104,30 @@ const AdminPage = () => {
                     },
                 }
             );
+            setSuccess('Número de incidencia asignado correctamente.');
+            setError('');
+            setIncidentNumber(''); // Limpiar el campo de entrada después de la asignación
+            await fetchRecentDeliveries(); // Refrescar la lista para asegurar que el estado se actualiza
         } catch (error) {
             setError('Error al asignar el número de incidencia.');
             console.error(error);
         }
-        setSuccess('Número de incidencia asignado correctamente.');
-        setError('');
-        fetchRecentDeliveries();
     };
 
+    // Lógica actualizada para cambiar el estado al hacer clic en un albarán
     const toggleDeliveryDetails = (deliveryId) => {
-        setSelectedDeliveryId((prevId) => (prevId === deliveryId ? null : deliveryId));
+        // Verificar si se hace clic sobre el mismo albarán para alternar el estado
+        if (selectedDeliveryId === deliveryId) {
+            setSelectedDeliveryId(null); // Si ya está seleccionado, cerrarlo
+        } else {
+            setSelectedDeliveryId(deliveryId); // Seleccionar el nuevo albarán
+        }
     };
 
-    const openLightbox = (images) => {
+    const openLightbox = (images, index) => {
         setLightboxImages(images.map((img) => ({ src: img.url || img.image })));
         setLightboxOpen(true);
+        setLightboxStartIndex(index);
     };
 
     const closeLightbox = () => {
@@ -124,11 +141,45 @@ const AdminPage = () => {
                     src={img.url || img.image}
                     alt={`Imagen ${index + 1}`}
                     className="thumbnail"
-                    onClick={() => openLightbox(images)}
+                    onClick={() => openLightbox(images, index)}
                 />
             </div>
         ))
     );
+
+    const renderProductsWithIssue = (delivery) => (
+        <ul>
+            {delivery.issues.map((issue, index) => (
+                <li key={index}>
+                     {delivery.product_descriptions[index] || 'Descripción no disponible'}
+                </li>
+            ))}
+        </ul>
+    );
+
+    // const renderStatusIcon = (status) => {
+    //     switch (status) {
+    //         case 'finalizado':
+    //             return <div className="status-circle status-green"></div>;
+    //         case 'tratado_pendiente_resolucion':
+    //             return <div className="status-circle status-yellow"></div>;
+    //         case 'pendiente_tratar':
+    //         default:
+    //             return <div className="status-circle status-red"></div>;
+    //     }
+    // };
+
+    const renderStatusClass = (status) => {
+        switch (status) {
+            case 'finalizado':
+                return 'status-green';
+            case 'tratado_pendiente_resolucion':
+                return 'status-yellow';
+            case 'pendiente_tratar':
+            default:
+                return 'status-red';
+        }
+    };
 
     return (
         <div className="admin-dashboard">
@@ -136,87 +187,76 @@ const AdminPage = () => {
             {loading ? (
                 <p>Cargando albaranes...</p>
             ) : (
-                <div className="delivery-list">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Albarán</th>
-                                <th>Cliente</th>
-                                <th>Tipo de Visita</th>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {deliveries.map((delivery) => (
-                                <React.Fragment key={delivery.id}>
-                                    <tr
-                                        className={delivery.has_issue ? 'issue-highlight' : ''}
-                                        onClick={() => toggleDeliveryDetails(delivery.id)}
-                                    >
-                                        <td>{delivery.fiscal_year}/{delivery.delivery_number}</td>
-                                        <td>{delivery.client_number_display} - {delivery.customer_name}</td>
-                                        <td>{delivery.visit_type}</td>
-                                        <td>{delivery.status}</td>
-                                        <td>{new Date(delivery.created_at).toLocaleString()}</td>
-                                    </tr>
-                                    {selectedDeliveryId === delivery.id && (
-                                        <tr className="delivery-details-row">
-                                            <td colSpan="5">
-                                                <div className="delivery-details">
-                                                    <h4>Observaciones:</h4>
-                                                    <p>{delivery.observations || 'Ninguna'}</p>
-                                                    
-                                                    <h4>Productos con Incidencia:</h4>
-                                                    <ul>
-                                                        {delivery.issues.map((issue, index) => (
-                                                            <li key={index}>
-                                                                E-{issue} Descripción del producto
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                <div className="card-container">
+                    {deliveries.map((delivery) => (
+                        <div className={`card ${renderStatusClass(delivery.status)}`} key={delivery.id}>
+                        <div className="card-header" onClick={() => toggleDeliveryDetails(delivery.id)}>
+                            <h5>Albarán {delivery.fiscal_year}/{delivery.delivery_number}</h5>
+                            
+                        </div>
+                            <div className="card-body">
+                                <p><strong>Cliente:</strong> {delivery.client_number_display} {delivery.customer_name}</p>
+                                <p><strong>Transportista:</strong> {delivery.username}</p>
+                                <p><strong>Tipo de Visita:</strong> {delivery.visit_type_display}</p>
+                                <p><strong>Estado:</strong> {delivery.status_display}</p>
+                                <p><strong>Fecha:</strong> {new Date(delivery.created_at).toLocaleString()}</p>
+                                {delivery.incident_number && (
+                                    <p><strong>Número de Incidencia:</strong> {delivery.incident_number}</p>
+                                )}
+                                {selectedDeliveryId === delivery.id && (
+                                    <>
+                                        {/* Solo mostrar "Productos con Incidencia" si hay incidencias */}
+                                        {delivery.has_issue && (
+                                            <>
+                                                <p><strong>Nº Producto/s: </strong> {renderProductsWithIssue(delivery)}</p>
+                                            </>
+                                        )}
 
-                                                    <div className="image-containers">
-                                                        <div className="image-slider">
-                                                            <h4>Finalización Entrega</h4>
-                                                            <Slider {...getSliderSettings(delivery.delivery_images.length)}>
-                                                                {renderImages(delivery.delivery_images)}
-                                                            </Slider>
-                                                        </div>
-                                                        <div className="image-slider">
-                                                            <h4>Fotos de la Incidencia</h4>
-                                                            <Slider {...getSliderSettings(delivery.issue_photos.length)}>
-                                                                {renderImages(delivery.issue_photos)}
-                                                            </Slider>
-                                                        </div>
-                                                    </div>
+                                        <div className="image-containers">
+                                            <div className="image-slider">
+                                                <h4>Finalización Entrega</h4>
+                                                <Slider {...getSliderSettings(delivery.delivery_images.length)}>
+                                                    {renderImages(delivery.delivery_images)}
+                                                </Slider>
+                                            </div>
 
-                                                    {delivery.has_issue && (
-                                                        <div className="incident-form">
-                                                            <label htmlFor="incident-number">Número de Incidencia:</label>
-                                                            <input
-                                                                type="text"
-                                                                id="incident-number"
-                                                                value={incidentNumber}
-                                                                onChange={handleIncidentNumberChange}
-                                                                className="form-control"
-                                                            />
-                                                            <button 
-                                                                onClick={() => handleIncidentSubmit(delivery.id)}
-                                                                className="btn btn-primary"
-                                                            >
-                                                                Asignar Número de Incidencia
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                            {/* Solo mostrar las "Fotos de la Incidencia" si hay incidencias */}
+                                            {delivery.has_issue && (
+                                                <div className="image-slider">
+                                                    <h4>Fotos de la Incidencia</h4>
+                                                    <Slider {...getSliderSettings(delivery.issue_photos.length)}>
+                                                        {renderImages(delivery.issue_photos)}
+                                                    </Slider>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </tbody>
-                    </table>
+                                            )}
+                                        </div>
+
+                                        {delivery.has_issue && (
+                                            <div className="incident-form">
+                                                <label htmlFor="incident-number">Número de Incidencia:</label>
+                                                <div className="incident-input-container">
+                                                    <input
+                                                        type="text"
+                                                        id="incident-number"
+                                                        value={incidentNumber}
+                                                        onChange={handleIncidentNumberChange}
+                                                        className="form-control incident-input"
+                                                        maxLength="4" // Limitar la entrada a 4 caracteres
+                                                    />
+                                                    <button
+                                                        onClick={() => handleIncidentSubmit(delivery.id)}
+                                                        className="btn btn-primary assign-button"
+                                                    >
+                                                        Asignar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
             {lightboxOpen && (
@@ -224,6 +264,7 @@ const AdminPage = () => {
                     open={lightboxOpen}
                     close={closeLightbox}
                     slides={lightboxImages}
+                    index={lightboxStartIndex} // Mostrar las imágenes correspondientes en la Lightbox
                 />
             )}
             {error && <div className="alert alert-danger">{error}</div>}

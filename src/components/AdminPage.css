@@ -1,71 +1,221 @@
+
+/* Contenedor principal */
 .admin-dashboard {
+    background-color: white;
     padding: 20px;
-    background: #f4f5f7;
     min-height: 100vh;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
-.delivery-list {
-    background: white;
-    padding: 20px;
+.admin-dashboard h2{
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: -20px;
+}
+
+/* Contenedor de las tarjetas */
+.admin-dashboard .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+/* Estilos de las tarjetas */
+.admin-dashboard .card {
+    background-color: white; /* Fondo blanco por defecto */
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-}
-
-.table th, .table td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: bold;
-}
-
-.issue-highlight {
-    background-color: #ffe0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    width: calc(33% - 20px);
+    padding: 25px;
+    transition: transform 0.2s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
     cursor: pointer;
+    border: 3px solid transparent; /* Borde transparente por defecto */
+    margin-bottom: 20px;
 }
 
-.delivery-details {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+/* Efecto hover en las tarjetas con degradado radial */
+.admin-dashboard .card:hover {
+    transform: translateY(-3px); /* Elevación ligera */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+}
+
+/* Degradado radial más vibrante según el estado */
+.admin-dashboard .card.status-green {
+    background-color: #e8f5e9; /* Verde pastel */
+    border-left: 4px solid #4caf50; /* Borde verde */
+}
+
+
+
+.admin-dashboard .card.status-yellow {
+    background-color: #fffde7; /* Amarillo pastel */
+    border-left: 4px solid #ffeb3b; /* Borde amarillo */
+}
+
+
+.admin-dashboard .card.status-red {
+    background-color: #ffebee; /* Rojo pastel */
+    border-left: 4px solid #f44336; /* Borde rojo */
+}
+
+
+/* Cabecera de las tarjetas */
+.admin-dashboard .card-header {
+    background-color: #f0f4f8; /* Un color suave que combine con el fondo de la tarjeta */
+    padding: 10px 15px; /* Espaciado alrededor del texto */
+    border-bottom: 2px solid #e0e7ef; /* Línea suave en la parte inferior */
+    border-radius: 8px 8px 0 0; /* Bordes superiores redondeados */
+    text-align: center;
+    font-size: 1.1rem; /* Tamaño de fuente moderado */
+    font-weight: 600; /* Negrita moderada */
+    color: #333; /* Texto oscuro suave */
+    border-color: #333;
+}
+
+
+.admin-dashboard .card:hover .card-header {
+    background-color: #e6f2fb; /* Cambio de color suave al pasar el mouse */
+}
+
+
+.admin-dashboard .card-header h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-dashboard .card-body h4 {
+    font-size: 1rem; /* Ajustar el tamaño para que sea igual a los campos anteriores */
+    font-weight: bold;
+    margin-top: 15px; /* Separación superior para que se vea alineado */
+    color: #333; /* Color oscuro similar al resto */
+}
+
+.admin-dashboard .card-body ul {
+    list-style-type: none; /* Eliminar los puntos de las listas */
+    padding-left: 0; /* Alinear el contenido con el resto */
+}
+
+.admin-dashboard .card-body ul li {
+    font-size: 1rem; /* Mismo tamaño de fuente */
+    color: #555; /* Color de texto similar */
+    margin-bottom: 5px; /* Espaciado entre productos */
+}
+
+.admin-dashboard .card-body p {
+    font-size: 1rem; /* Asegurar que todo el texto tenga el mismo tamaño */
+    color: #333; /* Color uniforme */
+    margin-bottom: 10px; /* Espaciado uniforme entre párrafos */
+}
+
+/* Cuerpo de las tarjetas */
+.admin-dashboard .card-body {
     margin-top: 10px;
 }
 
-.image-containers {
-   display: flex;
-    gap: 20px;
-    flex-wrap: wrap; 
-    justify-content: space-between;
+.admin-dashboard .card-body p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+}
 
+
+
+/* Miniaturas de imágenes */
+.admin-dashboard .thumbnail {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 0 auto;
+}
+
+.admin-dashboard .thumbnail:hover {
+    transform: scale(1.05);
+}
+
+/* Botones y alertas */
+.admin-dashboard .btn-info {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.admin-dashboard .btn-info:hover {
+    background-color: #2196f3;
+}
+
+.admin-dashboard .alert {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.admin-dashboard .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.admin-dashboard .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Ajustes adicionales para sliders */
+.admin-dashboard .image-slider .slick-list {
+    overflow: hidden !important;
+    padding: 0;
+}
+
+.admin-dashboard .image-slider .slick-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-dashboard .image-slider .slick-slide {
+    display: flex;
+    justify-content: center;
+    max-width: 100%;
+}
+
+/* Contenedores de imágenes */
+.image-containers {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
 }
 
 .image-slider {
     flex: 1;
-    max-width: 600px;
-    width: 100%;
-    overflow: hidden; /* Evitar que las imágenes se desborden */
-    padding: 10px;
-    box-sizing: border-box;
- 
-    height: 350px; /* Ajusta la altura según el diseño deseado */
+    width: 50%;
+    text-align: center;
+    overflow: hidden;
+    
 }
+
+.admin-dashboard .card-body h4 {
+    font-size: 1.2em; /* Aumentar el tamaño del título */
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.admin-dashboard .image-slider h4 {
+    margin-bottom: 10px;
+    font-size: 1.1em; /* Tamaño de texto ajustado */
+}
+
 .image-slide img {
     width: 100%;
-    max-height: 300px; /* Ajusta la altura máxima de la imagen */
-    object-fit: contain; /* Asegura que la imagen se ajuste dentro del contenedor sin cortarse */
-    cursor: pointer;
+    height: auto;
+    object-fit: cover;
     border-radius: 5px;
-    display: block;
 }
 
 .custom-arrow {
@@ -76,7 +226,7 @@
     color: white;
     border-radius: 50%;
     padding: 5px;
-    z-index: 2;
+    z-index: 1;
     cursor: pointer;
 }
 
@@ -88,49 +238,40 @@
     left: 10px;
 }
 
-.thumbnail {
-    width: 100%;
-    height: auto;
-    max-height: 200px; /* Ajusta la altura máxima de las miniaturas */
-    object-fit: cover;
+/* Formulario de asignación de incidencias */
+.incident-form {
+    margin-top: 20px;
 }
 
-.thumbnail:hover {
-    transform: scale(1.05);
-    transition: transform 0.2s;
-}
-
-.alert {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.alert-success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-/* Ajustes adicionales para sliders */
-.image-slider .slick-list {
-    overflow: hidden !important; /* Asegura que las imágenes no se desborden */
-    padding: 0;
-}
-
-.image-slider .slick-track {
+.incident-input-container {
     display: flex;
     align-items: center;
-   
+    gap: 10px;
 }
 
-.image-slider .slick-slide {
-    display: flex;
-    justify-content: center;
-    max-width: 100%; /* Evitar que las imágenes se salgan del slider */
-    box-sizing: border-box;
+.incident-input {
+    width: 70%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
+
+.assign-button {
+    padding: 5px 15px;
+    border-radius: 5px;
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.assign-button:hover {
+    background-color: #2196f3;
+}
+
+.Productos{
+    text-align: center;
+}
+
+
