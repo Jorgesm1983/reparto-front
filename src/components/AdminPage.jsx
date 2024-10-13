@@ -7,6 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import 'yet-another-react-lightbox/dist/styles.css';
 import './AdminPage.css';
 import Cookies from 'js-cookie';
+import Pagination from './Pagination'; // Ajusta la ruta según sea necesario
 
 const NextArrow = ({ onClick }) => (
     <div className="custom-arrow custom-next" onClick={onClick}>
@@ -54,6 +55,11 @@ const AdminPage = () => {
     const [lightboxImages, setLightboxImages] = useState([]);
     const [lightboxStartIndex, setLightboxStartIndex] = useState(0);
 
+    // Nuevos estados
+    const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState('cards');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         fetchRecentDeliveries();
@@ -114,13 +120,11 @@ const AdminPage = () => {
         }
     };
 
-    // Lógica actualizada para cambiar el estado al hacer clic en un albarán
     const toggleDeliveryDetails = (deliveryId) => {
-        // Verificar si se hace clic sobre el mismo albarán para alternar el estado
         if (selectedDeliveryId === deliveryId) {
-            setSelectedDeliveryId(null); // Si ya está seleccionado, cerrarlo
+            setSelectedDeliveryId(null); 
         } else {
-            setSelectedDeliveryId(deliveryId); // Seleccionar el nuevo albarán
+            setSelectedDeliveryId(deliveryId); 
         }
     };
 
@@ -157,18 +161,6 @@ const AdminPage = () => {
         </ul>
     );
 
-    // const renderStatusIcon = (status) => {
-    //     switch (status) {
-    //         case 'finalizado':
-    //             return <div className="status-circle status-green"></div>;
-    //         case 'tratado_pendiente_resolucion':
-    //             return <div className="status-circle status-yellow"></div>;
-    //         case 'pendiente_tratar':
-    //         default:
-    //             return <div className="status-circle status-red"></div>;
-    //     }
-    // };
-
     const renderStatusClass = (status) => {
         switch (status) {
             case 'finalizado':
@@ -181,19 +173,51 @@ const AdminPage = () => {
         }
     };
 
+
+    const filteredDeliveries = deliveries.filter((delivery) =>
+        (delivery.customer_name && delivery.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) || // Buscar por nombre de cliente (case-insensitive)
+        (delivery.client_number_display && delivery.client_number_display.toString().includes(searchTerm)) || // Buscar por número de cliente
+        (delivery.delivery_number && delivery.delivery_number.toString().includes(searchTerm)) // Buscar por número de albarán
+    );
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentDeliveries = filteredDeliveries.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    
+
     return (
         <div className="admin-dashboard">
             <h2>Administración de Albaranes</h2>
+
+             {/* Barra de herramientas con campo de búsqueda y botón de alternar vista */}
+             <div className="toolbar">
+                <input 
+                    type="text" 
+                    className="search-bar" 
+                    placeholder="Buscar..." 
+                    value={searchTerm} 
+                    onChange={(e) => setSearchTerm(e.target.value)} 
+                />
+                <button 
+                    className="list-view-button" 
+                    onClick={() => setViewMode(viewMode === 'cards' ? 'list' : 'cards')}
+                >
+                    {viewMode === 'cards' ? 'Vista de Lista' : 'Vista de Tarjetas'}
+                </button>
+            </div>
+
             {loading ? (
                 <p>Cargando albaranes...</p>
-            ) : (
+            ) : viewMode === 'cards' ? (
                 <div className="card-container">
-                    {deliveries.map((delivery) => (
+                    {currentDeliveries.map((delivery) => (
                         <div className={`card ${renderStatusClass(delivery.status)}`} key={delivery.id}>
-                        <div className="card-header" onClick={() => toggleDeliveryDetails(delivery.id)}>
-                            <h5>Albarán {delivery.fiscal_year}/{delivery.delivery_number}</h5>
-                            
-                        </div>
+                            <div className="card-header" onClick={() => toggleDeliveryDetails(delivery.id)}>
+                                <h5>Albarán {delivery.fiscal_year}/{delivery.delivery_number}</h5>
+                            </div>
                             <div className="card-body">
                                 <p><strong>Cliente:</strong> {delivery.client_number_display} {delivery.customer_name}</p>
                                 <p><strong>Transportista:</strong> {delivery.username}</p>
@@ -205,11 +229,17 @@ const AdminPage = () => {
                                 )}
                                 {selectedDeliveryId === delivery.id && (
                                     <>
-                                        {/* Solo mostrar "Productos con Incidencia" si hay incidencias */}
                                         {delivery.has_issue && (
                                             <>
                                                 <p><strong>Nº Producto/s: </strong> {renderProductsWithIssue(delivery)}</p>
                                             </>
+                                        )}
+
+                                        {delivery.observations && (
+                                            <div className="observations-section">
+                                                <h4>Observaciones:</h4>
+                                                <p>{delivery.observations}</p>
+                                            </div>
                                         )}
 
                                         <div className="image-containers">
@@ -220,7 +250,6 @@ const AdminPage = () => {
                                                 </Slider>
                                             </div>
 
-                                            {/* Solo mostrar las "Fotos de la Incidencia" si hay incidencias */}
                                             {delivery.has_issue && (
                                                 <div className="image-slider">
                                                     <h4>Fotos de la Incidencia</h4>
@@ -241,7 +270,7 @@ const AdminPage = () => {
                                                         value={incidentNumber}
                                                         onChange={handleIncidentNumberChange}
                                                         className="form-control incident-input"
-                                                        maxLength="4" // Limitar la entrada a 4 caracteres
+                                                        maxLength="4"
                                                     />
                                                     <button
                                                         onClick={() => handleIncidentSubmit(delivery.id)}
@@ -258,13 +287,45 @@ const AdminPage = () => {
                         </div>
                     ))}
                 </div>
+            ) : (
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Albarán</th>
+                            <th>Cliente</th>
+                            <th>Tipo de Visita</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentDeliveries.map((delivery) => (
+                            <tr key={delivery.id}>
+                                <td>{delivery.delivery_number}</td>
+                                <td>{delivery.client_number_display} {delivery.customer_name}</td> {/* Renderizar cliente como "número_cliente nombre_cliente" */}
+                                <td>{delivery.visit_type}</td>
+                                <td>{delivery.status}</td>
+                                <td>{new Date(delivery.created_at).toLocaleString()}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             )}
+
+            {/* Paginación */}
+            <Pagination
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredDeliveries.length}
+                paginate={paginate}
+            />
+
             {lightboxOpen && (
                 <Lightbox
                     open={lightboxOpen}
                     close={closeLightbox}
                     slides={lightboxImages}
-                    index={lightboxStartIndex} // Mostrar las imágenes correspondientes en la Lightbox
+                    index={lightboxStartIndex}
                 />
             )}
             {error && <div className="alert alert-danger">{error}</div>}

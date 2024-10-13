@@ -274,4 +274,143 @@
     text-align: center;
 }
 
+.admin-dashboard .observations-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
+.admin-dashboard .observations-section h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.admin-dashboard .observations-section p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    list-style: none;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    color: #333;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+}
+
+/* Contenedor principal */
+.table-view-container {
+    width: 100%;
+    padding: 20px;
+    background-color: #f4f5f7;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Barra de herramientas (botón de lista + búsqueda) */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Campo de búsqueda */
+.search-bar {
+    width: 300px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.search-bar:focus {
+    border-color: #2196f3;
+}
+
+/* Botón de vista de lista */
+.list-view-button {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.list-view-button:hover {
+    background-color: #0b7dda;
+}
+
+/* Tabla */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th, .table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+
+.table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.table td {
+    color: #555;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .list-view-button {
+        width: 100%;
+    }
+}
