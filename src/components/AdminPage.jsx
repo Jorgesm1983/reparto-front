@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Slider from 'react-slick';
 import Lightbox from 'yet-another-react-lightbox';
@@ -22,8 +22,8 @@ const PrevArrow = ({ onClick }) => (
 );
 
 const getSliderSettings = (imagesLength) => ({
-    dots: false,
-    infinite: false,
+    dots: true,
+    infinite: imagesLength > 1,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
@@ -59,28 +59,67 @@ const AdminPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('cards');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 12;
+    const [filters, setFilters] = useState({
+        dateFrom: '',
+        dateTo: '',
+        transportista: '',
+        visitType: '',
+        status: '',
+        hasIncidentNumber: '',
+        hasObservations: '',
+    });
 
-    useEffect(() => {
-        fetchRecentDeliveries();
-    }, []);
+        // Función para manejar los cambios en los filtros
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters({
+            ...filters,
+            [name]: value,
+        });
+    };
 
-    const fetchRecentDeliveries = async () => {
+
+    const fetchRecentDeliveries = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await axios.get('http://192.168.1.40:8000/api/recent_deliveries/', {
+            const params = new URLSearchParams();
+
+            // Añadir los filtros seleccionados por el usuario
+            if (filters.dateFrom) {
+                params.append('dateFrom', filters.dateFrom);
+            }
+            if (filters.dateTo) {
+                params.append('dateTo', filters.dateTo);
+            }
+            if (filters.visitType) {
+                params.append('visit_type', filters.visitType);
+            }
+            if (filters.status) {
+                params.append('status', filters.status);
+            }
+            if (filters.hasIssue) {
+                params.append('has_issue', filters.hasIssue);
+            }
+
+            // Realizar la petición con los filtros aplicados
+            const response = await axios.get(`http://192.168.1.40:8000/api/recent_deliveries/?${params.toString()}`, {
                 withCredentials: true,
             });
-            const sortedDeliveries = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            setDeliveries(sortedDeliveries);
+            setDeliveries(response.data);
         } catch (error) {
             console.error('Error al obtener los albaranes:', error);
             setError('Error al obtener los albaranes.');
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]); // Dependencias: solo se ejecutará cuando cambien los filtros
 
+    useEffect(() => {
+        fetchRecentDeliveries();
+    }, [fetchRecentDeliveries]); // Añadimos fetchRecentDeliveries como dependencia
+
+    
     const handleIncidentNumberChange = (event) => {
         setIncidentNumber(event.target.value);
     };
@@ -129,9 +168,11 @@ const AdminPage = () => {
     };
 
     const openLightbox = (images, index) => {
+        console.log('Images for Lightbox:', images); // Asegúrate de que las imágenes sean las correctas
         setLightboxImages(images.map((img) => ({ src: img.url || img.image })));
         setLightboxOpen(true);
         setLightboxStartIndex(index);
+        
     };
 
     const closeLightbox = () => {
@@ -140,7 +181,7 @@ const AdminPage = () => {
 
     const renderImages = (images) => (
         images.map((img, index) => (
-            <div key={img.url || img.image} className="image-slide">
+            <div key={`${img.url || img.image}-${index}`} className="image-slide">
                 <img
                     src={img.url || img.image}
                     alt={`Imagen ${index + 1}`}
@@ -161,6 +202,8 @@ const AdminPage = () => {
         </ul>
     );
 
+
+
     const renderStatusClass = (status) => {
         switch (status) {
             case 'finalizado':
@@ -173,12 +216,45 @@ const AdminPage = () => {
         }
     };
 
+     const filteredDeliveries = deliveries
+    .filter((delivery) => {
+        // Búsqueda por término ingresado (nombre de cliente, número de cliente, número de albarán)
+        const searchTermMatch = (
+            (delivery.customer_name && delivery.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+            (delivery.client_number_display && delivery.client_number_display.toString().includes(searchTerm)) || 
+            (delivery.delivery_number && delivery.delivery_number.toString().includes(searchTerm))
+        );
+    
+        // Filtros por fechas, transportista, tipo de visita, estado, etc.
+        const dateFromMatch = filters.dateFrom ? new Date(delivery.created_at) >= new Date(filters.dateFrom) : true;
+        const dateToMatch = filters.dateTo ? new Date(delivery.created_at) <= new Date(filters.dateTo) : true;
+        const transportistaMatch = filters.transportista ? delivery.username.toLowerCase().includes(filters.transportista.toLowerCase()) : true;
+        const visitTypeMatch = filters.visitType ? delivery.visit_type === filters.visitType : true;
+        const statusMatch = filters.status ? delivery.status === filters.status : true;
+        const hasIncidentNumberMatch = filters.hasIncidentNumber === 'yes' 
+            ? !!delivery.incident_number 
+            : filters.hasIncidentNumber === 'no' 
+            ? !delivery.incident_number 
+            : true;
+        const hasObservationsMatch = filters.hasObservations === 'yes'
+            ? !!delivery.observations 
+            : filters.hasObservations === 'no' 
+            ? !delivery.observations 
+            : true;
 
-    const filteredDeliveries = deliveries.filter((delivery) =>
-        (delivery.customer_name && delivery.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) || // Buscar por nombre de cliente (case-insensitive)
-        (delivery.client_number_display && delivery.client_number_display.toString().includes(searchTerm)) || // Buscar por número de cliente
-        (delivery.delivery_number && delivery.delivery_number.toString().includes(searchTerm)) // Buscar por número de albarán
-    );
+        // Retornar solo si coincide con la búsqueda y los filtros
+        return searchTermMatch && dateFromMatch && dateToMatch && transportistaMatch && visitTypeMatch && statusMatch && hasIncidentNumberMatch && hasObservationsMatch;
+    })
+    .sort((a, b) => {
+        // Ordenar según la selección del usuario
+        if (filters.orderByDate === 'asc') {
+            return new Date(a.created_at) - new Date(b.created_at);
+        } else {
+            return new Date(b.created_at) - new Date(a.created_at);
+        }
+    });
+
+    
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -190,6 +266,56 @@ const AdminPage = () => {
 
     return (
         <div className="admin-dashboard">
+            {/* Barra lateral de filtros */}
+        <div className="filters-sidebar">
+            <h4>Filtros</h4>
+            <label>Rango de Fechas:</label>
+            <input type="date" name="dateFrom" value={filters.dateFrom} onChange={handleFilterChange} />
+            <input type="date" name="dateTo" value={filters.dateTo} onChange={handleFilterChange} />
+
+            <label>Ordenar por Fecha:</label>
+        <select name="orderByDate" value={filters.orderByDate} onChange={handleFilterChange}>
+            <option value="desc">Más reciente</option>
+            <option value="asc">Más antiguo</option>
+        </select>
+
+            <label>Transportista:</label>
+            <input type="text" name="transportista" value={filters.transportista} onChange={handleFilterChange} placeholder="Buscar transportista" />
+
+            <label>Tipo de Visita:</label>
+            <select name="visitType" value={filters.visitType} onChange={handleFilterChange}>
+                <option value="">Todos</option>
+                <option value="delivery">Entrega</option>
+                <option value="verification">Verificación</option>
+                <option value="resolution">Resolución</option>
+            </select>
+
+            <label>Estado:</label>
+            <select name="status" value={filters.status} onChange={handleFilterChange}>
+                <option value="">Todos</option>
+                <option value="pendiente_tratar">Pendiente de Tratar</option>
+                <option value="tratado_pendiente_resolucion">Tratado Pendiente de Resolución</option>
+                <option value="finalizado">Finalizado</option>
+            </select>
+
+            <label>Número de Incidencia:</label>
+            <select name="hasIncidentNumber" value={filters.hasIncidentNumber} onChange={handleFilterChange}>
+                <option value="">Todos</option>
+                <option value="yes">Sí</option>
+                <option value="no">No</option>
+            </select>
+
+            <label>Observaciones:</label>
+            <select name="hasObservations" value={filters.hasObservations} onChange={handleFilterChange}>
+                <option value="">Todos</option>
+                <option value="yes">Sí</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        {/* Contenido principal */}
+        <div className="content">
+            
             <h2>Administración de Albaranes</h2>
 
              {/* Barra de herramientas con campo de búsqueda y botón de alternar vista */}
@@ -231,7 +357,7 @@ const AdminPage = () => {
                                     <>
                                         {delivery.has_issue && (
                                             <>
-                                                <p><strong>Nº Producto/s: </strong> {renderProductsWithIssue(delivery)}</p>
+                                                <p><strong>Nº Producto/s: </strong></p> {renderProductsWithIssue(delivery)}
                                             </>
                                         )}
 
@@ -249,6 +375,24 @@ const AdminPage = () => {
                                                     {renderImages(delivery.delivery_images)}
                                                 </Slider>
                                             </div>
+
+                                            {delivery.visit_type === 'verification' && !delivery.is_resolved && delivery.issue_photos.length > 0 && (
+                                                <div className="image-slider">
+                                                    <h4>Fotos de la Incidencia</h4>
+                                                    <Slider {...getSliderSettings(delivery.issue_photos.length)}>
+                                                        {renderImages(delivery.issue_photos)}
+                                                    </Slider>
+                                                </div>
+                                            )}
+
+                                            {delivery.visit_type === 'resolution' && !delivery.is_resolved && delivery.issue_photos.length > 0 && (
+                                                <div className="image-slider">
+                                                    <h4>Fotos de la Incidencia</h4>
+                                                    <Slider {...getSliderSettings(delivery.issue_photos.length)}>
+                                                        {renderImages(delivery.issue_photos)}
+                                                    </Slider>
+                                                </div>
+                                            )}
 
                                             {delivery.has_issue && (
                                                 <div className="image-slider">
@@ -331,7 +475,10 @@ const AdminPage = () => {
             {error && <div className="alert alert-danger">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
         </div>
+    </div>
     );
 };
 
 export default AdminPage;
+
+// en verificación no se están mostrando las fotos de las incidencias

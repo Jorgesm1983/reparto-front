@@ -1,17 +1,80 @@
-
 /* Contenedor principal */
 .admin-dashboard {
+    display: flex;
+    flex-direction: row; /* Asegura que la barra lateral y el contenido estén en una fila */
     background-color: white;
     padding: 20px;
     min-height: 100vh;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
+    max-width: 100vw;
 }
 
-.admin-dashboard h2{
+
+.admin-dashboard h2 {
     text-align: center;
     margin-bottom: 40px;
     margin-top: -20px;
+}
+
+/* Barra lateral de filtros */
+.filters-sidebar {
+    width: 250px; /* Espacio fijo para la barra lateral */
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ccc;
+    position: sticky;
+    top: 0;
+    height: 100vh; /* Asegura que la barra lateral ocupe toda la altura */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.filters-sidebar h4 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.filters-sidebar label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.filters-sidebar input,
+.filters-sidebar select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.filters-sidebar input[type="date"] {
+    width: calc(50% - 10px);
+    display: inline-block;
+}
+
+.filters-sidebar button {
+    background-color: #2196f3;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filters-sidebar button:hover {
+    background-color: #0b7dda;
+}
+
+/* Contenido principal */
+.content {
+    flex: 1;
+    padding-left: 30px;
+    max-width: calc(100% - 250px);
 }
 
 /* Contenedor de las tarjetas */
@@ -20,60 +83,62 @@
     flex-wrap: wrap;
     gap: 20px;
     justify-content: space-between;
+    align-items: flex-start; /* Alineación superior para evitar superposición */
+    width: 100%;
+    max-width: 100%; /* Asegúrate de que el contenedor ocupe todo el espacio */
 }
 
 /* Estilos de las tarjetas */
 .admin-dashboard .card {
-    background-color: white; /* Fondo blanco por defecto */
+    flex: 0 1 calc(33% - 20px); /* Fuerza un tamaño fijo con flex */
+    box-sizing: border-box;
+    background-color: white;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: calc(33% - 20px);
     padding: 25px;
     transition: transform 0.2s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
     cursor: pointer;
-    border: 3px solid transparent; /* Borde transparente por defecto */
+    border: 3px solid transparent;
     margin-bottom: 20px;
+    position: relative;
 }
 
-/* Efecto hover en las tarjetas con degradado radial */
 .admin-dashboard .card:hover {
-    transform: translateY(-3px); /* Elevación ligera */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 2; /* Asegura que la tarjeta esté por encima de las demás */
+    border: 3px solid transparent /* Aplica un borde de hover suave */
 }
 
-/* Degradado radial más vibrante según el estado */
 .admin-dashboard .card.status-green {
-    background-color: #e8f5e9; /* Verde pastel */
-    border-left: 4px solid #4caf50; /* Borde verde */
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
 }
-
-
 
 .admin-dashboard .card.status-yellow {
-    background-color: #fffde7; /* Amarillo pastel */
-    border-left: 4px solid #ffeb3b; /* Borde amarillo */
+    background-color: #fffde7;
+    border-left: 4px solid #ffeb3b;
 }
-
 
 .admin-dashboard .card.status-red {
-    background-color: #ffebee; /* Rojo pastel */
-    border-left: 4px solid #f44336; /* Borde rojo */
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
 }
-
 
 /* Cabecera de las tarjetas */
 .admin-dashboard .card-header {
-    background-color: #f0f4f8; /* Un color suave que combine con el fondo de la tarjeta */
-    padding: 10px 15px; /* Espaciado alrededor del texto */
-    border-bottom: 2px solid #e0e7ef; /* Línea suave en la parte inferior */
-    border-radius: 8px 8px 0 0; /* Bordes superiores redondeados */
+    background-color: #f0f4f8;
+    padding: 10px 15px;
+    border-bottom: 2px solid #e0e7ef;
+    border-radius: 8px 8px 0 0;
     text-align: center;
-    font-size: 1.1rem; /* Tamaño de fuente moderado */
-    font-weight: 600; /* Negrita moderada */
-    color: #333; /* Texto oscuro suave */
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
     border-color: #333;
+    margin: 0; /* Asegúrate de que no haya margen que cause artefactos */
 }
-
 
 .admin-dashboard .card:hover .card-header {
     background-color: #e6f2fb; /* Cambio de color suave al pasar el mouse */
@@ -87,21 +152,21 @@
 }
 
 .admin-dashboard .card-body h4 {
-    font-size: 1rem; /* Ajustar el tamaño para que sea igual a los campos anteriores */
+    font-size: 1rem;
     font-weight: bold;
-    margin-top: 15px; /* Separación superior para que se vea alineado */
-    color: #333; /* Color oscuro similar al resto */
+    margin-top: 15px;
+    color: #333;
 }
 
 .admin-dashboard .card-body ul {
-    list-style-type: none; /* Eliminar los puntos de las listas */
-    padding-left: 0; /* Alinear el contenido con el resto */
+    list-style-type: none;
+    padding-left: 0;
 }
 
 .admin-dashboard .card-body ul li {
-    font-size: 1rem; /* Mismo tamaño de fuente */
-    color: #555; /* Color de texto similar */
-    margin-bottom: 5px; /* Espaciado entre productos */
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
 }
 
 .admin-dashboard .card-body p {
@@ -110,33 +175,30 @@
     margin-bottom: 10px; /* Espaciado uniforme entre párrafos */
 }
 
-/* Cuerpo de las tarjetas */
 .admin-dashboard .card-body {
     margin-top: 10px;
 }
 
 .admin-dashboard .card-body p {
     font-size: 1rem;
-    color: #555;
+    color: #333;
+
     line-height: 1.5;
 }
 
-
-
-/* Miniaturas de imágenes */
 .admin-dashboard .thumbnail {
-    width: 120px;
-    height: 120px;
+    max-width: 120px;
+    height: 150px;
     object-fit: cover;
     border-radius: 8px;
     margin: 0 auto;
+    display: block;
 }
 
 .admin-dashboard .thumbnail:hover {
     transform: scale(1.05);
 }
 
-/* Botones y alertas */
 .admin-dashboard .btn-info {
     background-color: #2196f3;
     color: white;
@@ -166,7 +228,6 @@
     color: #155724;
 }
 
-/* Ajustes adicionales para sliders */
 .admin-dashboard .image-slider .slick-list {
     overflow: hidden !important;
     padding: 0;
@@ -184,38 +245,42 @@
     max-width: 100%;
 }
 
-/* Contenedores de imágenes */
 .image-containers {
     display: flex;
     justify-content: space-between;
     gap: 20px;
     width: 100%;
+    max-width: 100%;
 }
 
 .image-slider {
     flex: 1;
-    width: 50%;
+    width: 100%; /* Asegura que use todo el ancho disponible */
     text-align: center;
-    overflow: hidden;
-    
+    overflow: hidden; /* Previene desbordamiento de contenido */
+    position: relative;
+    margin-left: 15px; /* Añade espacio entre la barra lateral y el carrusel */
 }
 
 .admin-dashboard .card-body h4 {
-    font-size: 1.2em; /* Aumentar el tamaño del título */
+    font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 15px;
 }
 
 .admin-dashboard .image-slider h4 {
     margin-bottom: 10px;
-    font-size: 1.1em; /* Tamaño de texto ajustado */
+    font-size: 1.1em;
 }
 
 .image-slide img {
     width: 100%;
-    height: auto;
-    object-fit: cover;
+    height: auto; /* Limita la altura de la imagen */
+    object-fit: contain;
     border-radius: 5px;
+    box-shadow: none;
+
+
 }
 
 .custom-arrow {
@@ -228,7 +293,10 @@
     padding: 5px;
     z-index: 1;
     cursor: pointer;
+    transition: transform 0.2s;
 }
+
+
 
 .custom-next {
     right: 10px;
@@ -238,7 +306,6 @@
     left: 10px;
 }
 
-/* Formulario de asignación de incidencias */
 .incident-form {
     margin-top: 20px;
 }
@@ -270,7 +337,7 @@
     background-color: #2196f3;
 }
 
-.Productos{
+.Productos {
     text-align: center;
 }
 
@@ -320,7 +387,6 @@
     border-color: #bbb;
 }
 
-/* Contenedor principal */
 .table-view-container {
     width: 100%;
     padding: 20px;
@@ -329,7 +395,6 @@
     font-family: Arial, sans-serif;
 }
 
-/* Barra de herramientas (botón de lista + búsqueda) */
 .toolbar {
     display: flex;
     justify-content: space-between;
@@ -337,7 +402,6 @@
     margin-bottom: 20px;
 }
 
-/* Campo de búsqueda */
 .search-bar {
     width: 300px;
     padding: 8px 12px;
@@ -352,7 +416,6 @@
     border-color: #2196f3;
 }
 
-/* Botón de vista de lista */
 .list-view-button {
     background-color: #2196f3;
     color: white;
@@ -368,7 +431,6 @@
     background-color: #0b7dda;
 }
 
-/* Tabla */
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -398,7 +460,6 @@
     color: #555;
 }
 
-/* Estilos responsivos */
 @media (max-width: 768px) {
     .toolbar {
         flex-direction: column;
@@ -413,4 +474,68 @@
     .list-view-button {
         width: 100%;
     }
+}
+
+/* Ajustes para pantallas más pequeñas */
+@media (max-width: 1200px) {
+    .admin-dashboard .card {
+        width: calc(50% - 20px); /* En pantallas más pequeñas, dos tarjetas por fila */
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard .card {
+        width: 100%; /* En pantallas muy pequeñas, una tarjeta por fila */
+    }
+}
+
+.container.mt-5 {
+    max-width: 90vw; /* Aumentar el ancho del contenedor principal */
+    padding: 0 10px; /* Añadir un poco de padding para espaciar los contenidos */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Ocultar barra lateral en pantallas pequeñas */
+@media (max-width: 768px) {
+    .filters-sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        display: none; /* Ocultar la barra lateral */
+    }
+
+    .content {
+        max-width: 100%;
+        padding-left: 0;
+    }
+    .admin-dashboard .card {
+        width: calc(50% - 20px);
+    
+    }
+    .admin-dashboard .card {
+        width: 100%;
+    }
+    .custom-arrow {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .admin-dashboard .card {
+        width: calc(50% - 20px);
+    }
+}
+
+/* Ajuste de los campos de fecha */
+.filters-sidebar input[type="date"] {
+    width: 100%; /* Aumenta el ancho al 100% del contenedor */
+    margin-bottom: 10px; /* Añadir margen inferior para separar los campos */
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
