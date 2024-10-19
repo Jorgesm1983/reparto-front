@@ -1,15 +1,16 @@
 /* Contenedor principal */
 .admin-dashboard {
     display: flex;
-    flex-direction: row; /* Asegura que la barra lateral y el contenido estén en una fila */
+    flex-direction: column;
     background-color: white;
-    padding: 20px;
     min-height: 100vh;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
-    max-width: 100vw;
 }
 
+.filters-sidebar h4{
+    text-align: center;
+}
 
 .admin-dashboard h2 {
     text-align: center;
@@ -19,15 +20,15 @@
 
 /* Barra lateral de filtros */
 .filters-sidebar {
-    width: 250px; /* Espacio fijo para la barra lateral */
+    width: 250px;
     padding: 20px;
+    margin-top: 1px;
     background-color: #f8f9fa;
-    border-right: 1px solid #ccc;
+    border-right: 1px solid #ddd;
     position: sticky;
-    top: 0;
-    height: 100vh; /* Asegura que la barra lateral ocupe toda la altura */
+    top: 80px; /* Ajuste para que quede debajo del header */
+    height: calc(100vh - 80px); /* Asegura que la barra lateral ocupe toda la altura restante */
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
 }
 
 .filters-sidebar h4 {
@@ -83,14 +84,13 @@
     flex-wrap: wrap;
     gap: 20px;
     justify-content: space-between;
-    align-items: flex-start; /* Alineación superior para evitar superposición */
-    width: 100%;
-    max-width: 100%; /* Asegúrate de que el contenedor ocupe todo el espacio */
+ 
+    /* width: 100%; */
+    /* max-width: 100%; Asegúrate de que el contenedor ocupe todo el espacio */
 }
 
 /* Estilos de las tarjetas */
 .admin-dashboard .card {
-    flex: 0 1 calc(33% - 20px); /* Fuerza un tamaño fijo con flex */
     box-sizing: border-box;
     background-color: white;
     border-radius: 8px;
@@ -101,7 +101,6 @@
     cursor: pointer;
     border: 3px solid transparent;
     margin-bottom: 20px;
-    position: relative;
 }
 
 .admin-dashboard .card:hover {
@@ -114,16 +113,25 @@
 .admin-dashboard .card.status-green {
     background-color: #e8f5e9;
     border-left: 4px solid #4caf50;
+
 }
 
 .admin-dashboard .card.status-yellow {
     background-color: #fffde7;
     border-left: 4px solid #ffeb3b;
+
 }
 
 .admin-dashboard .card.status-red {
     background-color: #ffebee;
     border-left: 4px solid #f44336;
+
+}
+
+/* Albarán en revisión o verificación no solucionada (naranja) */
+.admin-dashboard .card.status-orange {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
 }
 
 /* Cabecera de las tarjetas */
@@ -404,12 +412,13 @@
 
 .search-bar {
     width: 300px;
-    padding: 8px 12px;
+    padding: 10px 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
     outline: none;
     transition: border-color 0.3s ease;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .search-bar:focus {
@@ -425,6 +434,7 @@
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    position: absolute;
 }
 
 .list-view-button:hover {
@@ -461,19 +471,40 @@
 }
 
 @media (max-width: 768px) {
-    .toolbar {
+    .header-container {
         flex-direction: column;
-        align-items: stretch;
+        align-items: center;
+        gap: 15px;
     }
 
-    .search-bar {
-        margin-bottom: 10px;
-        width: 100%;
+    .header-container h2 {
+        font-size: 1.5rem;
+        text-align: center; /* Asegurar que el título se centre en la columna */
+        margin: 0;
     }
 
-    .list-view-button {
-        width: 100%;
+    .header-container .toolbar {
+        width: 100%; /* Asegurar que la barra de herramientas ocupe el ancho completo */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap; /* Para evitar que los elementos se colapsen */
     }
+
+    .header-container .list-view-button {
+        width: auto; /* Ajustar el ancho del botón según el contenido */
+        padding: 10px 20px; /* Añadir más espaciado dentro del botón */
+        font-size: 16px;
+        margin-top: 35px; /* Añadir margen superior para separarlo del título */
+    }
+
+    .header-container .search-bar {
+        width: 100%; /* Asegurar que el buscador ocupe el ancho disponible */
+        max-width: 300px;
+        margin-top: 35px; /* Añadir espacio superior al buscador también */
+    }
+
 }
 
 /* Ajustes para pantallas más pequeñas */
@@ -483,11 +514,20 @@
     }
 }
 
-@media (max-width: 768px) {
-    .admin-dashboard .card {
-        width: 100%; /* En pantallas muy pequeñas, una tarjeta por fila */
+@media (max-width: 1024px) {
+    .filters-sidebar {
+        display: none; /* Ocultar la barra lateral */
     }
+    .content {
+        max-width: 100%;
+        padding-left: 0; /* Eliminar el espacio reservado para la barra lateral */
+    }
+    .admin-dashboard .card-container {
+        justify-content: center; /* Centrar las tarjetas cuando no haya barra lateral */
+    } 
 }
+
+
 
 .container.mt-5 {
     max-width: 90vw; /* Aumentar el ancho del contenedor principal */
@@ -510,10 +550,7 @@
         max-width: 100%;
         padding-left: 0;
     }
-    .admin-dashboard .card {
-        width: calc(50% - 20px);
-    
-    }
+
     .admin-dashboard .card {
         width: 100%;
     }
@@ -523,11 +560,6 @@
     }
 }
 
-@media (max-width: 1024px) {
-    .admin-dashboard .card {
-        width: calc(50% - 20px);
-    }
-}
 
 /* Ajuste de los campos de fecha */
 .filters-sidebar input[type="date"] {
@@ -538,4 +570,77 @@
     border-radius: 5px;
     border: 1px solid #ccc;
     box-sizing: border-box;
+}
+
+/* Estilos para la cabecera */
+.header-container {
+    display: flex;
+    justify-content: space-between; /* Para alinear los elementos: botón de lista a la izquierda, título centrado, buscador a la derecha */
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para el header */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.header-container h2 {
+    text-align: center;
+    flex: 1; /* Hace que el título ocupe el espacio necesario para centrarse */
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.header-container .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.header-container .search-bar {
+    width: 250px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.header-container .search-bar:focus {
+    border-color: #007bff;
+}
+
+.header-container .list-view-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.header-container .list-view-button:hover {
+    background-color: #0056b3;
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    
+}
+
+.btn-secondary{
+    margin-left: 15px;
+    
 }

@@ -547,6 +547,7 @@ const fetchProductDescription = async (index, value) => {
                                         ref={completionPhotosRef}
                                         onChange={(e) => setCompletionPhotos([...e.target.files])}
                                         required
+
                                     />
                                     
                                 </div>

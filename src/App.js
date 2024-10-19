@@ -4,18 +4,43 @@ import Login from './components/login';
 import DeliveryForm from './components/DeliveryForm';
 import AdminPage from './components/AdminPage';
 import { useLastLocation } from './hooks/useLastLocation';
+import axios from 'axios';
 
 function App() {
     const [token, setToken] = useState(localStorage.getItem('token') || null);
-    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
-            setToken(storedToken);
-        }
-        setLoading(false);
-    }, []);
+        // Verificar la sesión en el backend
+        const checkSession = async () => {
+            try {
+                const response = await axios.get('http://192.168.1.40:8000/api/check-session/', {
+                    withCredentials: true,  // Asegura que las cookies de sesión se envíen
+                });
+                if (response.status !== 200) {
+                    // Redirigir al login si la sesión ha expirado
+                    handleLogout();
+                }
+            } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    // Si obtenemos un 401, redirigimos al login
+                    handleLogout();
+                } else {
+                    console.error('Error verificando la sesión:', error);
+                }
+            }
+        };
+
+        // Ejecutar la verificación de sesión cada minuto (60000 ms)
+        const interval = setInterval(() => {
+            if (token) {
+                checkSession();
+            }
+        }, 900000); // Cada 60 segundos
+
+        // Limpiar el intervalo cuando el componente se desmonte
+        return () => clearInterval(interval);
+    }, [token]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -24,9 +49,7 @@ function App() {
         window.location.href = '/login';
     };
 
-    if (loading) {
-        return <div className="loading">Cargando...</div>;
-    }
+
 
     return (
         <Router>
