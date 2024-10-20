@@ -5,6 +5,9 @@ import DeliveryForm from './components/DeliveryForm';
 import AdminPage from './components/AdminPage';
 import { useLastLocation } from './hooks/useLastLocation';
 import axios from 'axios';
+import EmailFailures from './components/EmailFailures';  // Página de fallos de emails
+import UnsatisfiedDeliveries from './components/UnsatisfiedDeliveries';  // Página de albaranes insatisfechos
+import Dashboard from './components/Dashboard'; 
 
 function App() {
     const [token, setToken] = useState(localStorage.getItem('token') || null);
@@ -82,14 +85,31 @@ function AuthRoutes({ token, setToken, handleLogout }) {
 
     return token ? (
         <Routes>
-            <Route path="/delivery-form" element={<DeliveryForm />} />
+            {/* Ruta principal que será el formulario de entrega */}
+            <Route path="/" element={<DeliveryForm />} />
+            
+            {/* Rutas autenticadas */}
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="*" element={<Navigate to="/delivery-form" />} />
+
+            {/* Ruta protegida para el Dashboard */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Ruta para Fallos de Emails */}
+            <Route path="/email-failures" element={<EmailFailures />} />
+            
+            {/* Ruta para Albaranes sin incidencia pero con insatisfacción */}
+            <Route path="/unsatisfied-deliveries" element={<UnsatisfiedDeliveries />} />
+            
+            {/* Redirigir cualquier otra ruta no definida a / (formulario de entrega) */}
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     ) : (
         <Routes>
+            {/* Redirigir al login si no hay token */}
             <Route path="/login" element={<Login setToken={setToken} />} />
-            <Route path="*" element={<Navigate to="/login" />} />
+
+            {/* Si no hay token, redirigir cualquier otra ruta al login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
     );
 }

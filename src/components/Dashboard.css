@@ -1,0 +1,235 @@
+/* Contenedor principal del Dashboard */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Estilos generales para el título del Dashboard */
+.container h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+/* Estilos de las tarjetas del Dashboard */
+.card {
+    box-sizing: border-box;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    transition: transform 0.2s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
+    cursor: pointer;
+    border: 3px solid transparent;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+/* Título y texto dentro de cada tarjeta */
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #007bff; /* Azul para títulos */
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #555;
+    margin: 15px 0;
+}
+
+.card h5 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Alinear los enlaces en horizontal */
+.card .albaranes-stats {
+    display: flex;
+    justify-content: space-around; /* Distribuir en horizontal */
+    align-items: center;
+    margin-top: 10px 0;
+    font-size: 1.2rem;
+    
+}
+
+/* Estilos para los enlaces en lugar de divs */
+.card .albaranes-stats a {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: color 0.2s ease-in-out;
+}
+
+.card .albaranes-stats a:hover {
+    color: #333; /* Cambiar color al hacer hover */
+}
+
+/* Estilos para los números */
+.card .albaranes-stats .stat-number {
+    font-size: 2.8rem; /* Tamaño grande para el número */
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6); /* Sombra negra difusa */
+    -webkit-text-stroke: 1px black; /* Contorno negro alrededor del texto */
+}
+
+/* Estilos para los textos */
+.card .albaranes-stats .stat-text {
+    font-size: 1.2rem; /* Tamaño más pequeño para el texto */
+    font-weight: bold;
+}
+
+/* Personalizar los colores según el estado */
+.card .albaranes-stats a.pending {
+    color: #f44336;
+
+}
+
+.card .albaranes-stats a.treated {
+    color: #ffeb3b; /* Verde para tratados */
+
+}
+
+.card .albaranes-stats a.unresolved {
+    color: #ff9800; /* Naranja para no resueltos */
+
+}
+
+/* Estilos adicionales para destacar los números */
+
+
+/* Botones de acción en las tarjetas */
+.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+/* Colores personalizados para cada botón */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    margin-top: 20px;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-warning {
+    background-color: #ff9800;
+    border: none;
+    margin-top: 20px;
+}
+
+.btn-warning:hover {
+    background-color: #e68900;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    border: none;
+    margin-top: 20px;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+}
+
+/* Contenedor del título principal */
+.dashboard-header {
+    color: #333; /* Color de texto neutral y suave */
+    text-align: center;
+    margin-bottom: 20px; /* Reducir espacio inferior */
+    padding: 20px 0;
+    text-align: center;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
+}
+
+/* Estilo del texto del título */
+.dashboard-header h1 {
+    font-size: 2rem; /* Tamaño más pequeño para que sea más sutil */
+    font-weight: 600; /* Mantener un poco de peso pero sin exagerar */
+    margin-bottom: 10px;
+}
+
+/* Línea decorativa debajo del título */
+.dashboard-header .underline {
+    width: 80px;
+    height: 2px;
+    background-color: #007bff; /* Color acorde a la paleta */
+    margin: 10px auto 0; /* Espaciado reducido */
+    border-radius: 2px;
+}
+
+/* Ajustar los iconos dentro de los botones */
+.btn i {
+    margin-right: 8px; /* Añadir espacio entre el icono y el texto */
+    font-size: 1.2rem; /* Ajustar tamaño de icono para que sea proporcional al botón */
+    vertical-align: middle; /* Alinearlo verticalmente con el texto */
+}
+
+/* Botones con colores personalizados */
+.btn-primary i {
+    color: white; /* Icono blanco en botón azul */
+}
+
+.btn-warning i {
+    color: white; /* Icono blanco en botón naranja */
+}
+
+.btn-danger i {
+    color: white; /* Icono blanco en botón rojo */
+}
+
+.card-text strong {
+    font-size: 1.1rem;
+    color: #007bff; /* Azul para destacar los números */
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .container h1 {
+        font-size: 2rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    .dashboard-header h1 {
+        font-size: 1.5rem; /* Ajuste para pantallas pequeñas */
+    }
+
+    .dashboard-header {
+        padding: 15px 0;
+    }
+
+    .dashboard-header .underline {
+        width: 60px;
+        height: 2px;
+    }    
+}

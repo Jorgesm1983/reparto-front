@@ -9,8 +9,9 @@ import './AdminPage.css';
 import Cookies from 'js-cookie';
 import Pagination from './Pagination'; // Ajusta la ruta según sea necesario
 import Select from 'react-select'; // Si usas react-select, por ejemplo
-import { useNavigate } from 'react-router-dom';  // Asegúrate de importar useNavigate
+import { useNavigate, useLocation } from 'react-router-dom';  // Asegúrate de importar useNavigate
 import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 const NextArrow = ({ onClick }) => (
     <div className="custom-arrow custom-next" onClick={onClick}>
@@ -35,6 +36,7 @@ const getSliderSettings = (imagesLength) => ({
     prevArrow: imagesLength > 1 ? <PrevArrow /> : null,
     adaptiveHeight: true,
     variableWidth: false,
+    lazyLoad: 'ondemand',  // Habilitar lazy loading
     responsive: [
         {
             breakpoint: 768,
@@ -57,6 +59,8 @@ const AdminPage = () => {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxImages, setLightboxImages] = useState([]);
     const [lightboxStartIndex, setLightboxStartIndex] = useState(0);
+    const location = useLocation();
+
 
     // Nuevos estados
     const [searchTerm, setSearchTerm] = useState('');
@@ -64,7 +68,6 @@ const AdminPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedTransportistas, setSelectedTransportistas] = useState([]); // Transportistas seleccionados
     const itemsPerPage = 12;
-    const navigate = useNavigate();  // Inicializa el hook useNavigate
     const [filters, setFilters] = useState({
         dateFrom: '',
         dateTo: '',
@@ -75,6 +78,9 @@ const AdminPage = () => {
         hasObservations: '',
     
     });
+    const navigate = useNavigate();
+  
+
 
     const transportistaOptions = Array.from(new Set(deliveries.map(d => d.username))) // Obtener solo nombres únicos
     .map(username => ({ value: username, label: username }));
@@ -95,17 +101,31 @@ const AdminPage = () => {
 
 
     const fetchRecentDeliveries = useCallback(async () => {
+        setLoading(true);
+        setError('');
         try {
-            setLoading(true);
+
             const params = new URLSearchParams();
 
+            // Si no se han pasado fechas desde la URL, aplicar el filtro de los últimos 7 días
+            const today = new Date();
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+
+            const dateFromParam = filters.dateFrom || sevenDaysAgo.toISOString().split('T')[0]; // Últimos 7 días por defecto
+            const dateToParam = filters.dateTo || today.toISOString().split('T')[0];            // Hoy por defecto
+    
+            // Añadir los filtros seleccionados por el usuario o los predeterminados
+            params.append('dateFrom', dateFromParam);
+            params.append('dateTo', dateToParam);
+
             // Añadir los filtros seleccionados por el usuario
-            if (filters.dateFrom) {
-                params.append('dateFrom', filters.dateFrom);
-            }
-            if (filters.dateTo) {
-                params.append('dateTo', filters.dateTo);
-            }
+            // if (filters.dateFrom) {
+            //     params.append('dateFrom', filters.dateFrom);
+            // }
+            // if (filters.dateTo) {
+            //     params.append('dateTo', filters.dateTo);
+            // }
             if (filters.visitType) {
                 params.append('visit_type', filters.visitType);
             }
@@ -116,30 +136,65 @@ const AdminPage = () => {
                 params.append('has_issue', filters.hasIssue);
             }
 
+            console.log(`Enviando parámetros: ${params.toString()}`);
+
             // Realizar la petición con los filtros aplicados
             const response = await axios.get(`http://192.168.1.40:8000/api/recent_deliveries/?${params.toString()}`, {
                 withCredentials: true,
             });
 
+            // Log para ver la respuesta recibida
+            console.log("Respuesta recibida:", response.data);
+            
+
 
             // Manejo del caso de error desde el backend
-            if (response.data.error) {
-                setError(response.data.error);  // Mostrar el error del backend en el frontend
+            if (response.status === 200) {
+                if (response.data.length === 0) {
+                    // Si no hay albaranes, muestra un mensaje indicando que no hay resultados
+                    setDeliveries([]);  // Dejar la lista vacía
+                    setError('No hay albaranes con este estado.');  // Mensaje de "sin resultados"
+                } else {
+                    setDeliveries(response.data);  // Actualiza las entregas si hay resultados
+                    setError('');  // Limpia cualquier error anterior
+                }
             } else {
-                setDeliveries(response.data);  // Si no hay error, actualiza las entregas
-                setError('');  // Limpia cualquier error anterior
+                setError('Error inesperado al obtener los albaranes.');  // Error inesperado
+                setDeliveries([]);  // Asegurarse de que no haya entregas
             }
-         } catch (error) {
-            console.error('Error al obtener los albaranes:', error);
-            setError('Error al obtener los albaranes.');
+        } catch (err) {
+            console.error('Error al obtener los albaranes:', err);
+            setError('Error al obtener los albaranes.');  // Muestra un mensaje genérico de error
+            setDeliveries([]);  // Asegurarse de que no haya entregas en caso de error
         } finally {
-            setLoading(false);
+            setLoading(false);  // Dejar de mostrar el estado de carga
         }
     }, [filters]); // Dependencias: solo se ejecutará cuando cambien los filtros
 
+    // Actualización del estado desde la URL
     useEffect(() => {
-        fetchRecentDeliveries();
-    }, [fetchRecentDeliveries]); // Añadimos fetchRecentDeliveries como dependencia
+        const queryParams = new URLSearchParams(location.search);
+        const statusFromURL = queryParams.get('status') || '';
+        const dateFromFromURL = queryParams.get('dateFrom') || ''; // Obtener dateFrom desde la URL
+        const dateToFromURL = queryParams.get('dateTo') || '';     // Obtener dateTo desde la URL
+
+        // Solo actualiza los filtros si el valor del estado es diferente
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            status: statusFromURL,
+            dateFrom: dateFromFromURL || prevFilters.dateFrom, // Si no se pasa dateFrom en la URL, mantener el anterior
+            dateTo: dateToFromURL || prevFilters.dateTo        // Si no se pasa dateTo en la URL, mantener el anterior
+        }));
+    }, [location.search]);
+
+    // Ejecutar la obtención de albaranes cuando cambien los filtros
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            fetchRecentDeliveries();
+        }, );  // Espera 500ms antes de hacer la solicitud
+
+        return () => clearTimeout(timeoutId);  // Cancela la solicitud anterior si el usuario sigue cambiando filtros
+    }, [fetchRecentDeliveries]);  // Mantén solo fetchRecentDeliveries como dependencia
 
     
     const handleIncidentNumberChange = (event) => {
@@ -208,6 +263,7 @@ const AdminPage = () => {
                     src={img.url || img.image}
                     alt={`Imagen ${index + 1}`}
                     className="thumbnail"
+                    loading="lazy"  // Lazy load para las imágenes
                     onClick={() => openLightbox(images, index)}
                 />
             </div>
@@ -250,8 +306,9 @@ const AdminPage = () => {
         );
     
         // Filtros por fechas, transportista, tipo de visita, estado, etc.
+        const truncateDate = (date) => new Date(date.toDateString());
         const dateFromMatch = filters.dateFrom ? new Date(delivery.created_at) >= new Date(filters.dateFrom) : true;
-        const dateToMatch = filters.dateTo ? new Date(delivery.created_at) <= new Date(filters.dateTo) : true;
+        const dateToMatch = filters.dateTo ? truncateDate(new Date(delivery.created_at)) <= new Date(filters.dateTo) : true;
         const transportistaMatch = selectedTransportistas.length > 0
                 ? selectedTransportistas.some(t => t.value === delivery.username)
                 : true;
@@ -268,6 +325,8 @@ const AdminPage = () => {
             : filters.hasObservations === 'no' 
             ? !delivery.observations 
             : true;
+
+        
 
         // Retornar solo si coincide con la búsqueda y los filtros
         return searchTermMatch && dateFromMatch && dateToMatch && transportistaMatch && visitTypeMatch && statusMatch && hasIncidentNumberMatch && hasObservationsMatch;
@@ -308,7 +367,7 @@ return (
             />
 
                     {/* Botón de retorno al Dashboard */}
-                    <button className="btn btn-secondary" onClick={() => navigate('/Dashboard.js')}>
+                    <button className="btn btn-secondary" onClick={() => navigate('/Dashboard')}>
                     <i className="bi bi-house-fill"></i> {/* Icono de Bootstrap de una casa */}
                     Dashboard
                     </button>
@@ -353,6 +412,7 @@ return (
                     <option value="">Todos</option>
                     <option value="pendiente_tratar">Pendiente de Tratar</option>
                     <option value="tratado_pendiente_resolucion">Tratado Pendiente de Resolución</option>
+                    <option value="no_resuelto">No Resuelto</option>
                     <option value="finalizado">Finalizado</option>
                 </select>
 
@@ -375,6 +435,10 @@ return (
             <div className="content">
                 {loading ? (
                     <p>Cargando albaranes...</p>
+                ) : error ? (
+                    <div className="alert alert-danger">{error}</div>
+                ) : currentDeliveries.length === 0 ? (
+                    <p>No se encontraron albaranes con los criterios seleccionados.</p>
                 ) : viewMode === 'cards' ? (
                     <div className="card-container">
                         {currentDeliveries.map((delivery) => (
@@ -520,7 +584,3 @@ return (
 
 export default AdminPage;
 
-// cuando en el filtro de fechas ponemos uno más antiguo de lo que hay creado se genera un error, modificar selector fecha para que sólo 
-// permita elegir hasta donde hay disponible.
-
-// Verificar si ocurre lo mismo con el transportista
