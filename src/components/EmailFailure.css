@@ -1,0 +1,251 @@
+/* Contenedor principal de la página */
+.email-failures-page {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+
+
+/* Título principal de la página */
+.email-failures-page h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: -20px;
+}
+
+/* Contenedor de filtros y tabla */
+.email-failures-page .content-wrapper {
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px; /* Ajuste para que esté alineado con la tabla */
+}
+
+/* Barra lateral de filtros */
+.email-failures-page .filters-sidebar {
+    width: 250px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    position: sticky;
+    top: 100px; /* Ajusta según la altura del título u otros elementos */
+    height: calc(100vh - 80px); /* Asegura que ocupe toda la altura */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para los filtros */
+.email-failures-page .filters-sidebar h4 {
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.email-failures-page .filters-sidebar label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.email-failures-page .filters-sidebar input,
+.email-failures-page .filters-sidebar select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.email-failures-page .filters-sidebar button {
+    background-color: #2196f3;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.email-failures-page .filters-sidebar button:hover {
+    background-color: #0b7dda;
+}
+
+/* Contenedor principal */
+.email-failures-page .content {
+    flex: 1;
+    padding-left: 30px;
+    margin-left: 10px;
+    margin-top: 0px; /* Alinea el contenido con la barra lateral */
+}
+
+/* Tabla de fallos de emails */
+.email-failures-page .table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    
+}
+
+/* Encabezado de la tabla */
+.email-failures-page .table thead th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+    position: sticky; /* Mantiene los títulos fijos */
+    top: 0;
+    z-index: 2; /* Asegura que los títulos estén encima de los datos */
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para destacar los títulos */
+}
+
+.email-failures-page .table select {
+    width: auto; /* Permite que el campo select se ajuste automáticamente al contenido */
+    min-width: 115px; /* Asegura un ancho mínimo suficiente */
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Celdas de datos */
+.email-failures-page .table tbody td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+    color: #555;
+}
+
+
+/* Hover en filas de datos */
+.email-failures-page .table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.email-failures-page .table input[type="email"],
+.email-failures-page .table select {
+    padding: 4px 6px; /* Ajusta el padding de los campos de entrada */
+    font-size: 12px;  /* Asegura que el tamaño de fuente sea pequeño */
+}
+
+/* Entrada de email */
+.email-failures-page .table input[type="email"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Select para estado */
+.email-failures-page .table select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Botones */
+.email-failures-page .table .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.email-failures-page .table .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.email-failures-page .table .action-buttons {
+    display: flex;
+    justify-content: center; /* Centrar los botones horizontalmente */
+    gap: 4px; /* Espacio pequeño entre los botones */
+    align-items: center; /* Alinear los botones verticalmente */
+    padding: 0; /* Eliminar padding adicional en la celda */
+}
+
+.email-failures-page .table .btn-primary, 
+.email-failures-page .table .btn-secondary {
+
+    font-size: 12px; /* Mantener el tamaño de fuente pequeño */
+    border-radius: 4px;
+    margin: 0; /* Eliminar márgenes adicionales */
+    white-space: nowrap; /* Evitar desbordamientos de texto */
+}
+
+.email-failures-page .table .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+
+.email-failures-page .table .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+
+.email-failures-page .table td {
+    padding: 6px 8px; /* Reducir el padding de las celdas para compactar la fila */
+    vertical-align: middle; /* Alinear el contenido al centro de la celda */
+    white-space: nowrap; /* Evitar el desbordamiento del contenido */
+}
+
+/* Ajuste de la celda de acciones para que sea más estrecha */
+.email-failures-page .table td:last-child {
+    width: auto; /* Deja que la celda se ajuste automáticamente al contenido */
+    text-align: center; /* Alinear el contenido al centro horizontalmente */
+    vertical-align: middle; /* Alinear el contenido al centro verticalmente */
+    padding: 4px; /* Reducir el padding de la celda */
+    white-space: nowrap; /* Evitar que los botones salten a la siguiente línea */
+}
+
+.email-failures-page .table .action-buttons {
+    display: flex;
+    justify-content: flex-start; /* Mantener los botones alineados a la izquierda */
+    gap: 2px; /* Reducir el espacio entre los botones */
+    align-items: center; /* Alinear los botones verticalmente en el centro */
+    padding: 0; /* Eliminar el padding en la celda */
+}
+/* Responsividad */
+@media (max-width: 768px) {
+    .email-failures-page .filters-sidebar {
+        display: none;
+    }
+
+    .email-failures-page .content {
+        padding-left: 0;
+        max-width: 100%;
+    }
+
+    .email-failures-page .table input[type="email"],
+    .email-failures-page .table select {
+        width: 100%;
+        padding: 6px;
+    }
+
+    .email-failures-page .table .btn-primary,
+    .email-failures-page .table .btn-secondary {
+        width: 100%;
+        padding: 10px;
+    }
+}
+
+.email-failures-page .header-container {
+    display: flex;
+    justify-content: space-between; /* Título a la izquierda y botón a la derecha */
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.email-failures-page .header-container h2 {
+    margin: 0;
+}
+
+.email-failures-page .dashboard-btn {
+    margin-left: 20px;
+}

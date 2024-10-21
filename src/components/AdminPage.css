@@ -325,24 +325,28 @@
 }
 
 .incident-input {
-    width: 70%;
-    padding: 5px;
+    flex-grow: 1; /* El input ocupa todo el espacio disponible */
+    padding: 8px 10px; /* Ajuste del padding interno del input */
     border-radius: 5px;
     border: 1px solid #ccc;
+    font-size: 14px; /* Asegura que el texto dentro del input sea del mismo tamaño */
 }
 
+
 .assign-button {
-    padding: 5px 15px;
+    padding: 8px 14px; /* Ajuste de padding para que el botón coincida con la altura del input */
     border-radius: 5px;
     background-color: #2196f3;
     color: white;
     border: none;
     cursor: pointer;
+    font-size: 14px; /* Tamaño del texto del botón similar al input */
     transition: background-color 0.3s;
+    margin-bottom: 18px;
 }
 
 .assign-button:hover {
-    background-color: #2196f3;
+    background-color: #1976d2;
 }
 
 .Productos {

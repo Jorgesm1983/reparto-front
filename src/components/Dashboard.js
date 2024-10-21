@@ -14,6 +14,7 @@ const Dashboard = () => {
     const [pendingAlbaranes, setPendingAlbaranes] = useState(0);
     const [treatedAlbaranes, setTreatedAlbaranes] = useState(0);
     const [unresolvedAlbaranes, setUnresolvedAlbaranes] = useState(0);
+    const [pendingEmails, setPendingEmails] = useState(0); // Estado para guardar el número de correos no contactados
 
     // Efecto para obtener datos de los albaranes cuando se monta el componente
     useEffect(() => {
@@ -21,22 +22,27 @@ const Dashboard = () => {
             try {
                 // Petición para obtener los albaranes pendientes de tratar
                 const pendingResponse = await axios.get('http://192.168.1.40:8000/api/albaranes-pendientes/');
-                setPendingAlbaranes(pendingResponse.data.count); // Asume que la respuesta tiene el formato { count: <numero> }
-
-                // Petición para obtener los albaranes tratados pendientes de resolución
+                setPendingAlbaranes(pendingResponse.data.count);
+    
                 const treatedResponse = await axios.get('http://192.168.1.40:8000/api/albaranes-tratados/');
                 setTreatedAlbaranes(treatedResponse.data.count);
-
-                // Petición para obtener los albaranes sin resolver
+    
                 const unresolvedResponse = await axios.get('http://192.168.1.40:8000/api/albaranes-no-resueltos/');
                 setUnresolvedAlbaranes(unresolvedResponse.data.count);
+    
+                // Petición para obtener el número de correos no contactados
+                const pendingEmailsResponse = await axios.get('http://192.168.1.40:8000/api/count_pending_emails/');
+                setPendingEmails(pendingEmailsResponse.data.pending_count); // Asume que la respuesta tiene el formato { pending_count: <numero> }
             } catch (error) {
-                console.error('Error al obtener datos de albaranes:', error);
+                console.error('Error al obtener datos:', error);
             }
         };
-
-        fetchAlbaranesData(); // Llamamos a la función que obtiene los datos
+    
+        fetchAlbaranesData(); // Llamamos a la función que obtiene los datos // Llamamos a la función que obtiene los datos
     }, []); // Se ejecuta una vez al montar el componente
+
+    
+    
 
     return (
         <div className="container mt-5">
@@ -50,7 +56,7 @@ const Dashboard = () => {
                     <div className="card text-center">
                         <div className="card-body">
                             <i className="bi bi-person-circle icon-large mb-3"></i> {/* Icono de Admin */}
-                            <h5 className="card-title">Admin</h5>
+                            <h5 className="card-title">Gestión Entregas</h5>
                                     {/* Link para redirigir a los albaranes pendientes */}
                                     <div className="albaranes-stats">
                                         <Link to="/admin?status=pendiente_tratar&dateFrom=2024-01-01" className="pending">
@@ -69,7 +75,7 @@ const Dashboard = () => {
                                         </Link>
                                     </div>
                             <Link to="/admin" className="btn btn-primary">
-                                <i className="bi bi-arrow-right-circle"></i> Ir al Admin
+                                <i className="bi bi-arrow-right-circle"></i> Gestión Albaranes
                             </Link>
                         </div>
                     </div>
@@ -78,10 +84,15 @@ const Dashboard = () => {
                     <div className="card text-center">
                         <div className="card-body">
                             <i className="bi bi-envelope-exclamation icon-large mb-3"></i> {/* Icono de Fallos de Emails */}
-                            <h5 className="card-title">Fallos de Emails</h5>
-                            <p className="card-text">Ver información sobre los fallos en los correos electrónicos.</p>
+                            <h5 className="card-title">Clientes No Notificados</h5>
+                            <div className="albaranes-stats">
+                                <Link to="/email-failures?status=pending" className="pending">
+                                    <span className="stat-number">{pendingEmails}</span>
+                                    <span className="stat-text">No Contactados</span>
+                                </Link>
+                            </div>
                             <Link to="/email-failures" className="btn btn-warning">
-                                <i className="bi bi-envelope"></i> Fallos de Emails
+                                <i className="bi bi-envelope"></i> Gestión Contactos
                             </Link>
                         </div>
                     </div>
@@ -93,7 +104,7 @@ const Dashboard = () => {
                             <h5 className="card-title">Albaranes con Insatisfacción</h5>
                             <p className="card-text">Ver los albaranes sin incidencias pero con insatisfacción del cliente.</p>
                             <Link to="/unsatisfied-deliveries" className="btn btn-danger">
-                                <i className="bi bi-exclamation-triangle-fill"></i> Albaranes Insatisfechos
+                                <i className="bi bi-exclamation-triangle-fill"></i> Gestión Clientes
                             </Link>
                         </div>
                     </div>

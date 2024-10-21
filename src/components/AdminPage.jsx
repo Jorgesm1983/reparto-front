@@ -508,7 +508,7 @@ return (
 
                                             {delivery.has_issue && (
                                                 <div className="incident-form">
-                                                    <label htmlFor="incident-number">Número de Incidencia:</label>
+                                                    <label htmlFor="incident-number"></label>
                                                     <div className="incident-input-container">
                                                         <input
                                                             type="text"
@@ -517,6 +517,7 @@ return (
                                                             onChange={handleIncidentNumberChange}
                                                             className="form-control incident-input"
                                                             maxLength="4"
+                                                            placeholder='Número de incidencia'
                                                         />
                                                         <button
                                                             onClick={() => handleIncidentSubmit(delivery.id)}
