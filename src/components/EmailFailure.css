@@ -239,7 +239,6 @@
     display: flex;
     justify-content: space-between; /* Título a la izquierda y botón a la derecha */
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .email-failures-page .header-container h2 {

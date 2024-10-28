@@ -386,7 +386,7 @@ const fetchProductDescription = async (index, value) => {
                                                     />
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlFor="issues">Números de Productos Afectados</label>
+                                                    <label htmlFor="issues">Código/s de existencia productos afectado/s</label>
                                                     {issues.map((issue, index) => (
                                                         <div key={index} className="product-item-row align-items-center mb-2">
                                                              <div className="form-group product-input-group">

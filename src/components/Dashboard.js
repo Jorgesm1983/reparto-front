@@ -15,6 +15,7 @@ const Dashboard = () => {
     const [treatedAlbaranes, setTreatedAlbaranes] = useState(0);
     const [unresolvedAlbaranes, setUnresolvedAlbaranes] = useState(0);
     const [pendingEmails, setPendingEmails] = useState(0); // Estado para guardar el número de correos no contactados
+    const [notTreatedCustomers, setNotTreatedCustomers] = useState(0); // Estado para guardar el número de clientes insatisfechos no tratados
 
     // Efecto para obtener datos de los albaranes cuando se monta el componente
     useEffect(() => {
@@ -33,6 +34,10 @@ const Dashboard = () => {
                 // Petición para obtener el número de correos no contactados
                 const pendingEmailsResponse = await axios.get('http://192.168.1.40:8000/api/count_pending_emails/');
                 setPendingEmails(pendingEmailsResponse.data.pending_count); // Asume que la respuesta tiene el formato { pending_count: <numero> }
+
+                const notTreatedResponse = await axios.get('http://192.168.1.40:8000/api/count_unsatisfied_customers/');
+                setNotTreatedCustomers(notTreatedResponse.data.not_treated_count); // Asume que la respuesta tiene el formato { not_treated_count: <numero> }
+
             } catch (error) {
                 console.error('Error al obtener datos:', error);
             }
@@ -56,7 +61,7 @@ const Dashboard = () => {
                     <div className="card text-center">
                         <div className="card-body">
                             <i className="bi bi-person-circle icon-large mb-3"></i> {/* Icono de Admin */}
-                            <h5 className="card-title">Gestión Entregas</h5>
+                            <h5 className="card-title">Entregas</h5>
                                     {/* Link para redirigir a los albaranes pendientes */}
                                     <div className="albaranes-stats">
                                         <Link to="/admin?status=pendiente_tratar&dateFrom=2024-01-01" className="pending">
@@ -84,14 +89,14 @@ const Dashboard = () => {
                     <div className="card text-center">
                         <div className="card-body">
                             <i className="bi bi-envelope-exclamation icon-large mb-3"></i> {/* Icono de Fallos de Emails */}
-                            <h5 className="card-title">Clientes No Notificados</h5>
+                            <h5 className="card-title">Notificaciones</h5>
                             <div className="albaranes-stats">
-                                <Link to="/email-failures?status=pending" className="pending">
+                                <Link to="/email-failures?status=pendiente_contacto" className="pending">
                                     <span className="stat-number">{pendingEmails}</span>
                                     <span className="stat-text">No Contactados</span>
                                 </Link>
                             </div>
-                            <Link to="/email-failures" className="btn btn-warning">
+                            <Link to="/email-failures" className="btn btn-primary">
                                 <i className="bi bi-envelope"></i> Gestión Contactos
                             </Link>
                         </div>
@@ -101,9 +106,14 @@ const Dashboard = () => {
                     <div className="card text-center">
                         <div className="card-body">
                             <i className="bi bi-exclamation-triangle icon-large mb-3"></i> {/* Icono de Albaranes con Insatisfacción */}
-                            <h5 className="card-title">Albaranes con Insatisfacción</h5>
-                            <p className="card-text">Ver los albaranes sin incidencias pero con insatisfacción del cliente.</p>
-                            <Link to="/unsatisfied-deliveries" className="btn btn-danger">
+                            <h5 className="card-title">Clientes Insatisfechos</h5>
+                            <div className="albaranes-stats">
+                                <Link to="/unsatisfied-deliveries?status_satisfaction=no_tratado" className="not-treated">
+                                    <span className="stat-number">{notTreatedCustomers}</span>
+                                    <span className="stat-text">No Tratados</span>
+                                </Link>
+                            </div>
+                            <Link to="/unsatisfied-deliveries" className="btn btn-primary">
                                 <i className="bi bi-exclamation-triangle-fill"></i> Gestión Clientes
                             </Link>
                         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './EmailFailure.css'; // Estilos personalizados para esta página
 import { useNavigate} from 'react-router-dom';  // Asegúrate de importar useNavigate
+import { useLocation } from 'react-router-dom';
 
 const EmailFailuresPage = () => {
     // Definir el estado para los fallos de emails, motivos, y mensajes de error/éxito
@@ -9,7 +10,10 @@ const EmailFailuresPage = () => {
     const [reasons, setReasons] = useState([]);  // Estado para los motivos
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const location = useLocation();
     const navigate = useNavigate();
+    const query = new URLSearchParams(location.search);
+    const statusFilter = query.get('status') || '';  // Obtener el filtro 'status' de la URL
     // Definir los filtros en el estado
     const [filters, setFilters] = useState({
         dateFrom: '',
@@ -40,6 +44,7 @@ const EmailFailuresPage = () => {
                 if (filters.clientNumber) params.append('client_number', filters.clientNumber);
                 if (filters.status) params.append('status', filters.status);
                 if (filters.reason) params.append('reason', filters.reason);
+                if (statusFilter) params.append('status', statusFilter);  // Filtrar por status si está presente
 
                 const response = await axios.get(`http://192.168.1.40:8000/api/email_failures/?${params.toString()}`);
                 setEmailFailures(response.data);
@@ -50,7 +55,7 @@ const EmailFailuresPage = () => {
         };
 
         fetchEmailFailures();
-    }, [filters]); // Re-fetch when filters change
+    }, [filters, statusFilter]); // Re-fetch when filters change
 
     // Fetch de los motivos (reasons) para alimentar el filtro
     useEffect(() => {
@@ -163,7 +168,7 @@ const EmailFailuresPage = () => {
                     <label>Estado:</label>
                     <select name="status" onChange={handleFilterChange}>
                         <option value="">Todos</option>
-                        <option value="pending">Pendiente de Contacto</option>
+                        <option value="pendiente_contacto">Pendiente de Contacto</option>
                         <option value="contacted">Contactado</option>
                     </select>
                 </div>
@@ -188,7 +193,7 @@ const EmailFailuresPage = () => {
                             {emailFailures.map((failure) => (
                                 <tr key={failure.id}>
                                     <td>{failure.albaran}</td>
-                                    <td>{failure.client_number}</td>
+                                    <td>{failure.client_number} - {failure.name}</td>
                                     <td>
                                         <input 
                                             type="email"

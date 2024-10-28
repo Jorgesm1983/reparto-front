@@ -233,3 +233,11 @@
         height: 2px;
     }    
 }
+
+.not-treated .stat-number {
+    color: #f44336; /* Color rojo para no tratados */
+}
+
+.not-treated .stat-text {
+    color: #f44336;
+}
