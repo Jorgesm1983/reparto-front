@@ -139,7 +139,7 @@ const AdminPage = () => {
             console.log(`Enviando parámetros: ${params.toString()}`);
 
             // Realizar la petición con los filtros aplicados
-            const response = await axios.get(`http://192.168.1.40:8000/api/recent_deliveries/?${params.toString()}`, {
+            const response = await axios.get(`http://192.168.1.36:8000/api/recent_deliveries/?${params.toString()}`, {
                 withCredentials: true,
             });
 
@@ -217,7 +217,7 @@ const AdminPage = () => {
         try {
             const csrfToken = Cookies.get('csrftoken');
             await axios.post(
-                `http://192.168.1.40:8000/api/update_incident/${deliveryId}/`,
+                `http://192.168.1.36:8000/api/update_incident/${deliveryId}/`,
                 { incident_number: incidentNumber },
                 {
                     withCredentials: true,

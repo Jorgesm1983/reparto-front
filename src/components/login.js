@@ -14,7 +14,7 @@ const Login = ({ setToken }) => {
         try {
             const csrfToken = Cookies.get('csrftoken');
             const response = await axios.post(
-                'http://192.168.1.40:8000/api/login/',
+                'http://192.168.1.36:8000/api/login/',
                 { username, password },
                 {
                     headers: {

@@ -17,7 +17,7 @@ function App() {
         // Verificar la sesión en el backend
         const checkSession = async () => {
             try {
-                const response = await axios.get('http://192.168.1.40:8000/api/check-session/', {
+                const response = await axios.get('http://192.168.1.36:8000/api/check-session/', {
                     withCredentials: true,  // Asegura que las cookies de sesión se envíen
                 });
                 if (response.status !== 200) {

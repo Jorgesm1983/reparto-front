@@ -22,20 +22,20 @@ const Dashboard = () => {
         const fetchAlbaranesData = async () => {
             try {
                 // Petición para obtener los albaranes pendientes de tratar
-                const pendingResponse = await axios.get('http://192.168.1.40:8000/api/albaranes-pendientes/');
+                const pendingResponse = await axios.get('http://192.168.1.36:8000/api/albaranes-pendientes/');
                 setPendingAlbaranes(pendingResponse.data.count);
     
-                const treatedResponse = await axios.get('http://192.168.1.40:8000/api/albaranes-tratados/');
+                const treatedResponse = await axios.get('http://192.168.1.36:8000/api/albaranes-tratados/');
                 setTreatedAlbaranes(treatedResponse.data.count);
     
-                const unresolvedResponse = await axios.get('http://192.168.1.40:8000/api/albaranes-no-resueltos/');
+                const unresolvedResponse = await axios.get('http://192.168.1.36:8000/api/albaranes-no-resueltos/');
                 setUnresolvedAlbaranes(unresolvedResponse.data.count);
     
                 // Petición para obtener el número de correos no contactados
-                const pendingEmailsResponse = await axios.get('http://192.168.1.40:8000/api/count_pending_emails/');
+                const pendingEmailsResponse = await axios.get('http://192.168.1.36:8000/api/count_pending_emails/');
                 setPendingEmails(pendingEmailsResponse.data.pending_count); // Asume que la respuesta tiene el formato { pending_count: <numero> }
 
-                const notTreatedResponse = await axios.get('http://192.168.1.40:8000/api/count_unsatisfied_customers/');
+                const notTreatedResponse = await axios.get('http://192.168.1.36:8000/api/count_unsatisfied_customers/');
                 setNotTreatedCustomers(notTreatedResponse.data.not_treated_count); // Asume que la respuesta tiene el formato { not_treated_count: <numero> }
 
             } catch (error) {

@@ -46,7 +46,7 @@ const EmailFailuresPage = () => {
                 if (filters.reason) params.append('reason', filters.reason);
                 if (statusFilter) params.append('status', statusFilter);  // Filtrar por status si está presente
 
-                const response = await axios.get(`http://192.168.1.40:8000/api/email_failures/?${params.toString()}`);
+                const response = await axios.get(`http://192.168.1.36:8000/api/email_failures/?${params.toString()}`);
                 setEmailFailures(response.data);
             } catch (error) {
                 console.error('Error al obtener los fallos de emails:', error);
@@ -61,7 +61,7 @@ const EmailFailuresPage = () => {
     useEffect(() => {
         const fetchReasons = async () => {
             try {
-                const response = await axios.get('http://192.168.1.40:8000/api/email_failures/reasons/'); // Ajusta la ruta según tu API
+                const response = await axios.get('http://192.168.1.36:8000/api/email_failures/reasons/'); // Ajusta la ruta según tu API
                 setReasons(response.data);  // Guardamos los motivos en el estado
             } catch (error) {
                 console.error('Error al obtener los motivos:', error);
@@ -96,7 +96,7 @@ const EmailFailuresPage = () => {
     // Enviar el email después de corregir la dirección
     const resendEmail = async (id) => {
         try {
-            const response = await axios.post(`http://192.168.1.40:8000/api/resend_email/${id}/`);
+            const response = await axios.post(`http://192.168.1.36:8000/api/resend_email/${id}/`);
             console.log("Correo reenviado con éxito:", response.data);
         } catch (error) {
             console.error("Error al reenviar el correo:", error.response);
@@ -108,7 +108,7 @@ const EmailFailuresPage = () => {
         try {
             const failure = emailFailures.find(f => f.id === id);
             
-            await axios.put(`http://192.168.1.40:8000/api/update_failure/${id}/`, {
+            await axios.put(`http://192.168.1.36:8000/api/update_failure/${id}/`, {
                 new_email: failure.email,
                 status: failure.contact_status,  // Asegúrate de que este valor sea correcto
             });

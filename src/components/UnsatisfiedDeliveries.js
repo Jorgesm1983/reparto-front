@@ -83,7 +83,7 @@ const UnsatisfiedCustomersPage = () => {
                 if (filters.clientNumber) params.append('client_number', filters.clientNumber);
                 if (filters.status_satisfaction) params.append('status_satisfaction', filters.status_satisfaction);
 
-                const response = await axios.get(`http://192.168.1.40:8000/api/unsatisfied_customers/?${params.toString()}&ordering=-created_at`);
+                const response = await axios.get(`http://192.168.1.36:8000/api/unsatisfied_customers/?${params.toString()}&ordering=-created_at`);
                 
                 setUnsatisfiedDeliveries(response.data.results);
                 setPage(response.data.page);
@@ -113,7 +113,7 @@ const UnsatisfiedCustomersPage = () => {
     const saveObservation = async (id) => {
         try {
             const delivery = unsatisfiedDeliveries.find((d) => d.id === id);
-            await axios.put(`http://192.168.1.40:8000/api/update_unsatisfied_observation/${id}/`, {
+            await axios.put(`http://192.168.1.36:8000/api/update_unsatisfied_observation/${id}/`, {
                 observations: delivery.observations
             });
 

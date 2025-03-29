@@ -28,7 +28,7 @@ const fetchClientName = async (clientNumber) => {
     
     try {
         const csrfToken = Cookies.get('csrftoken'); // Asegúrate de obtener el token CSRF desde las cookies
-        const response = await axios.get(`http://192.168.1.40:8000/api/customer/${clientNumber}/`, {
+        const response = await axios.get(`http://192.168.1.36:8000/api/customer/${clientNumber}/`, {
             headers: {
                 'X-CSRFToken': csrfToken, // Incluye el CSRF token si es necesario
             },
@@ -63,7 +63,7 @@ const fetchProductDescription = async (index, value) => {
     
     try {
         const csrfToken = Cookies.get('csrftoken'); // Asegúrate de obtener el token CSRF desde las cookies
-        const response = await axios.get(`http://192.168.1.40:8000/api/product/${value}/`, {
+        const response = await axios.get(`http://192.168.1.36:8000/api/product/${value}/`, {
             headers: {
                 'X-CSRFToken': csrfToken, // Incluye el CSRF token si es necesario
             },
@@ -196,7 +196,7 @@ const fetchProductDescription = async (index, value) => {
         
         try {
             const csrfToken = Cookies.get('csrftoken'); // Obtener el CSRF token de las cookies
-            const response = await axios.post('http://192.168.1.40:8000/api/deliveries/', formData, {
+            const response = await axios.post('http://192.168.1.36:8000/api/deliveries/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'X-Requested-With': 'XMLHttpRequest',
